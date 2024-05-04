@@ -5,25 +5,19 @@ from mddrt.drt_parameters import DirectlyRootedTreeParameters
 
 def calculate_cases_metrics(
     log: pd.DataFrame,
-    case_id_key: str,
-    activity_key: str,
-    timestamp_key: str,
-    start_timestamp_key: str,
-    cost_key: str,
-    calculate_duration: bool = True,
-    calculate_cost: bool = True,
-    calculate_repeatability=True,  # measure of quality
-    calculate_optionality=True,  # measure of flexibility
+    params: DirectlyRootedTreeParameters,
     num_mandatory_activities=None,
 ) -> pd.DataFrame:
-    case_ids = sorted(log[case_id_key].unique())
+    case_ids = sorted(log[params.case_id_key].unique())
 
-    if calculate_optionality and num_mandatory_activities is None:
-        mandatory_activities = log.loc[log[case_id_key] == case_ids[0]][activity_key].unique()
+    if params.calculate_flexibility and num_mandatory_activities is None:
+        mandatory_activities = log.loc[log[params.case_id_key] == case_ids[0]][
+            params.activity_key
+        ].unique()
 
         for case_id in case_ids:
-            log_case = log.loc[log[case_id_key] == case_id]
-            case_activities = log_case[activity_key].unique()
+            log_case = log.loc[log[params.case_id_key] == case_id]
+            case_activities = log_case[params.activity_key].unique()
 
             non_mandatory_activities = []
             for mandatory_activity in mandatory_activities:
@@ -40,29 +34,29 @@ def calculate_cases_metrics(
     log_metrics = []
 
     for case_id in case_ids:
-        log_case = log.loc[log[case_id_key] == case_id]
+        log_case = log.loc[log[params.case_id_key] == case_id]
 
         case_metrics = {}
 
         case_metrics["Case Id"] = case_id
 
-        if calculate_duration:
-            case_start = log_case[start_timestamp_key].min()
-            case_complete = log_case[timestamp_key].max()
+        if params.calculate_time:
+            case_start = log_case[params.start_timestamp_key].min()
+            case_complete = log_case[params.timestamp_key].max()
 
             case_metrics["Duration"] = (case_complete - case_start).total_seconds()
 
-        if calculate_cost:
-            case_metrics["Cost"] = log_case[cost_key].sum()
+        if params.calculate_cost:
+            case_metrics["Cost"] = log_case[params.cost_key].sum()
 
-        if calculate_repeatability or calculate_optionality:
-            unique_activities = log_case[activity_key].unique()
+        if params.calculate_quality or params.calculate_flexibility:
+            unique_activities = log_case[params.activity_key].unique()
             num_unique_activities = len(unique_activities)
 
-            if calculate_repeatability:
+            if params.calculate_quality:
                 case_metrics["Repeatability"] = 1 - num_unique_activities / len(log_case)
 
-            if calculate_optionality:
+            if params.calculate_flexibility:
                 case_metrics["Optionality"] = (
                     num_unique_activities - num_mandatory_activities
                 ) / num_unique_activities

@@ -17,18 +17,7 @@ class DirectlyRootedTreeBuilder:
 
     def build_cases(self, cases_grouped_by_id: pd.Grouper) -> dict:
         cases = {}
-        cases_metrics = calculate_cases_metrics(
-            self.log,
-            self.params.case_id_key,
-            self.params.activity_key,
-            self.params.timestamp_key,
-            self.params.start_timestamp_key,
-            self.params.cost_key,
-            self.params.calculate_time,
-            self.params.calculate_cost,
-            self.params.calculate_quality,
-            self.params.calculate_flexibility,
-        )
+        cases_metrics = calculate_cases_metrics(self.log, self.params)
         for case in cases_grouped_by_id:
             case_id = case[0]
             cases[case_id] = {}
@@ -43,6 +32,7 @@ class DirectlyRootedTreeBuilder:
                 cases[case_id]["flexibility"] = case_metrics["Optionality"]
             if self.params.calculate_quality:
                 cases[case_id]["quality"] = case_metrics["Repeatability"]
+
         return cases
 
     def build_case_activities(self, case: pd.DataFrame):
