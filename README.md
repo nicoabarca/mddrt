@@ -1,2 +1,2 @@
-# mpdrt
-A Python package to visualize Multi-perspective Directly Rooted Trees
+# mddrt
+A Python package for Multi-Dimension Directly Rooted Trees visualization.
