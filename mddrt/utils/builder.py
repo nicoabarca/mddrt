@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from sys import maxsize
 from mddrt.drt_parameters import DirectlyRootedTreeParameters
 
 
@@ -68,3 +69,65 @@ def calculate_cases_metrics(
         log_metrics.append(case_metrics)
 
     return pd.DataFrame(log_metrics)
+
+
+def get_start_activities(cases_grouped_by_id: pd.DataFrame, params: DirectlyRootedTreeParameters):
+    start_activities = [
+        *dict(cases_grouped_by_id[params.activity_key].first().value_counts()).keys()
+    ]
+    return start_activities
+
+
+def get_end_activities(cases_grouped_by_id: pd.DataFrame, params: DirectlyRootedTreeParameters):
+    end_activities = [*dict(cases_grouped_by_id[params.activity_key].last().value_counts()).keys()]
+    return end_activities
+
+
+def create_case_data(params: DirectlyRootedTreeParameters):
+    case_data = {}
+    data = {
+        "total": 0,
+        "total_case": 0,
+        "remainder": 0,
+        "accumulated": 0,
+        "statistic": 0,
+        "max": 0,
+        "min": maxsize,
+    }
+    case_data["frequency"] = 0
+    if params.calculate_cost:
+        case_data["cost"] = data.copy()
+    if params.calculate_time:
+        case_data["time"] = data.copy()
+    return case_data
+
+
+def update_tree_activity_data(
+    tree: dict,
+    dimension: str,
+    current_case: dict,
+    case_data: dict,
+    params: DirectlyRootedTreeParameters,
+    depth: int,
+):
+    current_activity_name = current_case["activities"][depth]["name"]
+    if current_activity_name not in tree:
+        tree[current_activity_name] = {"data": case_data, "childrens": []}
+    tree[current_activity_name]["data"]["frequency"] += 1
+
+    if params.calculate_cost:
+        activity_cost = current_case["activities"][depth]["cost"]
+        accumulated_cost = (
+            tree[current_activity_name]["data"]["cost"]["accumulated"] + activity_cost
+        )
+        remainder_cost = tree[current_activity_name]["data"]["cost"]["remainder"] - activity_cost
+        tree[current_activity_name]["data"]["cost"]["total"] += activity_cost
+        tree[current_activity_name]["data"]["cost"]["total_case"] += current_case["cost"]
+        tree[current_activity_name]["data"]["cost"]["accumulated"] += accumulated_cost
+        tree[current_activity_name]["data"]["cost"]["remainder"] += remainder_cost
+        tree[current_activity_name]["data"]["cost"]["max"] = max(
+            tree[current_activity_name]["data"]["cost"]["max"], activity_cost
+        )
+        tree[current_activity_name]["data"]["cost"]["min"] = min(
+            tree[current_activity_name]["data"]["cost"]["min"], activity_cost
+        )
