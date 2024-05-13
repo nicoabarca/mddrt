@@ -84,9 +84,10 @@ def get_end_activities(cases_grouped_by_id: pd.DataFrame, params: DirectlyRooted
     return end_activities
 
 
-def create_case_data(params: DirectlyRootedTreeParameters):
+def create_case_data(params: DirectlyRootedTreeParameters, id: int):
     case_data = {}
     case_data["frequency"] = 0
+    case_data["id"] = id
     if params.calculate_cost:
         data = {
             "total": 0,

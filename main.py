@@ -16,4 +16,4 @@ blasting_format = {
 }
 
 blasting_event_log = mddrt.log_formatter(blasting_event_log, blasting_format)
-drt = mddrt.discover_multi_dimension_drt(blasting_event_log)
+drt = mddrt.discover_multi_dimension_drt(blasting_event_log, calculate_time=False)

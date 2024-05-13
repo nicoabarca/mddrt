@@ -17,6 +17,7 @@ class DirectlyRootedTreeBuilder:
         self.cases = None
         self.start_activities = None
         self.end_activities = None
+        self.id_counter = 0
         self.build()
 
     def build(self) -> None:
@@ -93,8 +94,9 @@ class DirectlyRootedTreeBuilder:
     ):
         current_activity = current_case["activities"][depth]["name"]
         if tree.get(current_activity) is None:
-            case_data = create_case_data(self.params)
+            case_data = create_case_data(self.params, self.id_counter)
             tree[current_activity] = {"data": case_data, "childrens": dict()}
+            self.id_counter += 1
         tree[current_activity]["data"]["frequency"] += 1
 
         activity_cost = 0
