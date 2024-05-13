@@ -7,7 +7,6 @@ from mddrt.utils.builder import (
     get_end_activities,
     create_case_data,
 )
-import pprint
 
 
 class DirectlyRootedTreeBuilder:
@@ -56,79 +55,94 @@ class DirectlyRootedTreeBuilder:
             if self.params.calculate_time:
                 activity_dict["time"] = (
                     activity[self.params.timestamp_key] - activity[self.params.start_timestamp_key]
-                ).total_seconds()
+                )
             case_activities.append(activity_dict)
         return case_activities
 
     def build_tree(self):
         tree = {}
-        for case_id, case in self.cases.items():
-            case_data = create_case_data(self.params)
+        for _, current_case in self.cases.items():
+            remainder_cost = 0
+            remainder_time = 0
             if self.params.calculate_cost:
-                case_data["cost"]["total_case"] = case["cost"]
+                remainder_cost = current_case["cost"]
             if self.params.calculate_time:
-                case_data["time"]["total_case"] = case["time"]
-            tree = self.nest_activities(tree, case, 0, case_data)
-            # TODO: check for total_cost, max_cost, min_cost, total_time, max_time, min_time of all cases
+                remainder_time = current_case["time"]
 
-            # min_state_cost, max_state_cost = float(int), 0
-            # min_state_time, max_state_time = float(int), 0
+            tree = self.nest_activities(
+                tree=tree,
+                current_case=current_case,
+                depth=0,
+                accumulated_cost=0,
+                accumulated_time=pd.Timedelta(days=0),
+                remainder_cost=remainder_cost,
+                remainder_time=remainder_time,
+            )
         print(tree)
         return tree
 
-    def nest_activities(self, tree: dict, current_case: dict, depth: int, case_data: dict):
-        current_activity_name = current_case["activities"][depth]["name"]
-        if tree.get(current_activity_name) is None:
-            tree[current_activity_name] = {"data": case_data, "childrens": {}}
-        tree[current_activity_name]["data"]["frequency"] += 1
+    def nest_activities(
+        self,
+        tree: dict,
+        current_case: dict,
+        depth: int,
+        accumulated_cost: int,
+        accumulated_time: pd.Timedelta,
+        remainder_cost: int,
+        remainder_time: pd.Timedelta,
+    ):
+        current_activity = current_case["activities"][depth]["name"]
+        if tree.get(current_activity) is None:
+            case_data = create_case_data(self.params)
+            tree[current_activity] = {"data": case_data, "childrens": dict()}
+        tree[current_activity]["data"]["frequency"] += 1
 
-        # TODO: make this conditionals cleaner
+        activity_cost = 0
         if self.params.calculate_cost:
-            # ERROR: here in acc cost and rem cost
             activity_cost = current_case["activities"][depth]["cost"]
-            accumulated_cost = (
-                tree[current_activity_name]["data"]["cost"]["accumulated"] + activity_cost
+
+            accumulated_cost = accumulated_cost + activity_cost
+            remainder_cost = remainder_cost - activity_cost
+
+            tree[current_activity]["data"]["cost"]["total"] += activity_cost
+            tree[current_activity]["data"]["cost"]["total_case"] += current_case["cost"]
+            tree[current_activity]["data"]["cost"]["accumulated"] += accumulated_cost
+            tree[current_activity]["data"]["cost"]["remainder"] += remainder_cost
+            tree[current_activity]["data"]["cost"]["max"] = max(
+                tree[current_activity]["data"]["cost"]["max"], activity_cost
             )
-            remainder_cost = (
-                tree[current_activity_name]["data"]["cost"]["remainder"] - activity_cost
-            )
-            tree[current_activity_name]["data"]["cost"]["total"] += activity_cost
-            tree[current_activity_name]["data"]["cost"]["total_case"] += current_case["cost"]
-            tree[current_activity_name]["data"]["cost"]["accumulated"] += accumulated_cost
-            tree[current_activity_name]["data"]["cost"]["remainder"] += remainder_cost
-            tree[current_activity_name]["data"]["cost"]["max"] = max(
-                tree[current_activity_name]["data"]["cost"]["max"], activity_cost
-            )
-            tree[current_activity_name]["data"]["cost"]["min"] = min(
-                tree[current_activity_name]["data"]["cost"]["min"], activity_cost
+            tree[current_activity]["data"]["cost"]["min"] = min(
+                tree[current_activity]["data"]["cost"]["min"], activity_cost
             )
 
         if self.params.calculate_time:
-            # ERROR: here in acc time and rem time
             activity_time = current_case["activities"][depth]["time"]
-            accumulated_time = (
-                tree[current_activity_name]["data"]["time"]["accumulated"] + activity_time
+
+            accumulated_time = accumulated_time + activity_time
+            remainder_time = remainder_time - activity_time
+
+            tree[current_activity]["data"]["time"]["total"] += activity_time
+            tree[current_activity]["data"]["time"]["total_case"] += current_case["time"]
+            tree[current_activity]["data"]["time"]["accumulated"] += accumulated_time
+            tree[current_activity]["data"]["time"]["remainder"] += remainder_time
+            tree[current_activity]["data"]["time"]["max"] = max(
+                tree[current_activity]["data"]["time"]["max"], activity_time
             )
-            remainder_time = (
-                tree[current_activity_name]["data"]["time"]["remainder"] - activity_time
-            )
-            tree[current_activity_name]["data"]["time"]["total"] += activity_time
-            tree[current_activity_name]["data"]["time"]["total_case"] += current_case["time"]
-            tree[current_activity_name]["data"]["time"]["accumulated"] += accumulated_time
-            tree[current_activity_name]["data"]["time"]["remainder"] += remainder_time
-            tree[current_activity_name]["data"]["time"]["max"] = max(
-                tree[current_activity_name]["data"]["time"]["max"], activity_time
-            )
-            tree[current_activity_name]["data"]["time"]["min"] = min(
-                tree[current_activity_name]["data"]["time"]["min"], activity_time
+            tree[current_activity]["data"]["time"]["min"] = min(
+                tree[current_activity]["data"]["time"]["min"], activity_time
             )
 
         next_depth = depth + 1
         if next_depth < len(current_case["activities"]):
-            tree[current_activity_name]["childrens"] = self.nest_activities(
-                tree[current_activity_name]["childrens"], current_case, next_depth, case_data
+            tree[current_activity]["childrens"] = self.nest_activities(
+                tree=tree[current_activity]["childrens"],
+                current_case=current_case,
+                depth=next_depth,
+                accumulated_cost=accumulated_cost,
+                accumulated_time=accumulated_time,
+                remainder_cost=remainder_cost,
+                remainder_time=remainder_time,
             )
-            return tree
         return tree
 
     def get_tree(self) -> dict:
