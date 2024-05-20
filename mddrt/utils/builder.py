@@ -51,12 +51,12 @@ def calculate_cases_metrics(
         if params.calculate_cost:
             case_metrics["Cost"] = log_case[params.cost_key].sum()
 
-        if params.calculate_quality or params.calculate_flexibility:
+        if params.calculate_rework or params.calculate_flexibility:
             unique_activities = log_case[params.activity_key].unique()
             num_unique_activities = len(unique_activities)
 
-            if params.calculate_quality:
-                case_metrics["Repeatability"] = 1 - num_unique_activities / len(log_case)
+            if params.calculate_rework:
+                case_metrics["Rework"] = len(log_case) - num_unique_activities
 
             if params.calculate_flexibility:
                 case_metrics["Optionality"] = (

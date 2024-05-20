@@ -13,21 +13,21 @@ class DirectlyRootedTreeBuilder:
     def __init__(self, log: pd.DataFrame, params: DirectlyRootedTreeParameters) -> None:
         self.log = log
         self.params = params
+        self.id_counter = 0
         self.tree = None
         self.cases = None
         self.start_activities = None
         self.end_activities = None
-        self.id_counter = 0
         self.build()
 
     def build(self) -> None:
         cases_grouped_by_id = self.log.groupby(self.params.case_id_key, dropna=True, sort=False)
         self.start_activities = get_start_activities(cases_grouped_by_id, self.params)
         self.end_activities = get_end_activities(cases_grouped_by_id, self.params)
-        self.cases = self.build_cases(cases_grouped_by_id)
-        self.tree = self.build_tree()
+        self.build_cases(cases_grouped_by_id)
+        self.build_tree()
 
-    def build_cases(self, cases_grouped_by_id: pd.Grouper) -> dict:
+    def build_cases(self, cases_grouped_by_id: pd.Grouper) -> None:
         cases = {}
         cases_metrics = calculate_cases_metrics(self.log, self.params)
         for case in cases_grouped_by_id:
@@ -42,9 +42,9 @@ class DirectlyRootedTreeBuilder:
                 cases[case_id]["time"] = case_metrics["Duration"]
             if self.params.calculate_flexibility:
                 cases[case_id]["flexibility"] = case_metrics["Optionality"]
-            if self.params.calculate_quality:
-                cases[case_id]["quality"] = case_metrics["Repeatability"]
-        return cases
+            if self.params.calculate_rework:
+                cases[case_id]["rework"] = case_metrics["Rework"]
+        self.cases = cases
 
     def build_case_activities(self, case: Tuple[int, pd.DataFrame]) -> list:
         case_activities = []
@@ -79,8 +79,7 @@ class DirectlyRootedTreeBuilder:
                 remainder_cost=remainder_cost,
                 remainder_time=remainder_time,
             )
-        print(tree)
-        return tree
+        self.tree = tree
 
     def nest_activities(
         self,
@@ -91,11 +90,11 @@ class DirectlyRootedTreeBuilder:
         accumulated_time: pd.Timedelta,
         remainder_cost: int,
         remainder_time: pd.Timedelta,
-    ):
+    ) -> dict:
         current_activity = current_case["activities"][depth]["name"]
         if tree.get(current_activity) is None:
             case_data = create_case_data(self.params, self.id_counter)
-            tree[current_activity] = {"data": case_data, "childrens": dict()}
+            tree[current_activity] = {"data": case_data, "children": dict()}
             self.id_counter += 1
         tree[current_activity]["data"]["frequency"] += 1
 
@@ -136,8 +135,8 @@ class DirectlyRootedTreeBuilder:
 
         next_depth = depth + 1
         if next_depth < len(current_case["activities"]):
-            tree[current_activity]["childrens"] = self.nest_activities(
-                tree=tree[current_activity]["childrens"],
+            tree[current_activity]["children"] = self.nest_activities(
+                tree=tree[current_activity]["children"],
                 current_case=current_case,
                 depth=next_depth,
                 accumulated_cost=accumulated_cost,

@@ -17,3 +17,4 @@ blasting_format = {
 
 blasting_event_log = mddrt.log_formatter(blasting_event_log, blasting_format)
 drt = mddrt.discover_multi_dimension_drt(blasting_event_log, calculate_time=False)
+mddrt.save_vis_dimension_drt(drt, file_path=os.path.join("data", "diagram"))
