@@ -51,15 +51,14 @@ def calculate_cases_metrics(
         if params.calculate_cost:
             case_metrics["Cost"] = log_case[params.cost_key].sum()
 
-        if params.calculate_rework or params.calculate_flexibility:
+        if params.calculate_quality or params.calculate_flexibility:
             unique_activities = log_case[params.activity_key].unique()
             num_unique_activities = len(unique_activities)
 
-            if params.calculate_rework:
+            if params.calculate_quality:
                 case_metrics["Rework"] = len(log_case) - num_unique_activities
 
             if params.calculate_flexibility:
-                # TODO:
                 case_metrics["Optionality"] = num_unique_activities - num_mandatory_activities
 
             case_metrics["Optional Activities"] = num_unique_activities - num_mandatory_activities
@@ -67,6 +66,8 @@ def calculate_cases_metrics(
             case_metrics["Total Activities"] = len(log_case)
 
         log_metrics.append(case_metrics)
+    print("metrics")
+    print(pd.DataFrame(log_metrics))
 
     return pd.DataFrame(log_metrics)
 
@@ -87,17 +88,24 @@ def create_case_data(params: DirectlyRootedTreeParameters, id: int):
     case_data = {}
     case_data["frequency"] = 0
     case_data["id"] = id
+    data = {
+        "total": 0,
+        "total_case": 0,
+        "remainder": 0,
+        "accumulated": 0,
+        "statistic": 0,
+        "max": 0,
+        "min": maxsize,
+    }
     if params.calculate_cost:
-        data = {
-            "total": 0,
-            "total_case": 0,
-            "remainder": 0,
-            "accumulated": 0,
-            "statistic": 0,
-            "max": 0,
-            "min": maxsize,
-        }
         case_data["cost"] = data
+
+    if params.calculate_quality:
+        case_data["quality"] = data
+
+    if params.calculate_flexibility:
+        case_data["flexibility"] = data
+
     if params.calculate_time:
         data = {
             "total": pd.Timedelta(days=0),
