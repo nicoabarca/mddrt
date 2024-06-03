@@ -59,9 +59,8 @@ def calculate_cases_metrics(
                 case_metrics["Rework"] = len(log_case) - num_unique_activities
 
             if params.calculate_flexibility:
-                case_metrics["Optionality"] = (
-                    num_unique_activities - num_mandatory_activities
-                ) / num_unique_activities
+                # TODO:
+                case_metrics["Optionality"] = num_unique_activities - num_mandatory_activities
 
             case_metrics["Optional Activities"] = num_unique_activities - num_mandatory_activities
             case_metrics["Unique Activities"] = num_unique_activities

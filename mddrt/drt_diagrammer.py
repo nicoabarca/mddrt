@@ -31,38 +31,58 @@ class DirectlyRootedTreeDiagrammer:
         self.diagram.graph_attr["rankdir"] = self.rankdir
 
     def traverse_to_diagram(self):
-        # FIX: dont hard code this value, maybe use the names of start activities
+        # TODO: dont hard code this value, maybe use the names of start activities
         root_name = "Coordinate verification of polygon pits status"
         root = self.tree[root_name]
         self.dfs(root, root_name)
-        print(self.diagram.source)
+        # print(self.diagram.source)
 
-    def dfs(self, node: dict, name: str, path=""):
-        # TODO: add state node and add activity node
+    def dfs(self, node: dict, name: str):
         # State Node
-        state_node_id = "s" + str(self.state_counter)
+        state_node_name = "s" + str(self.state_counter)
         self.state_counter += 1
+        state_label = self.build_state_label(node, name)
         self.diagram.node(
-            state_node_id,
-            label=f'{state_node_id} {str(node["data"]["cost"]["total_case"])}',
+            name=state_node_name,
+            label=state_label,
             shape="none",
         )
 
         # Activity Node
-        activity_node_id = str(node["data"]["id"])
-        self.diagram.node(activity_node_id, label=name, shape="none")
+        activity_node_name = str(node["data"]["id"])
+        self.diagram.node(
+            name=activity_node_name, label=f"{name} ({node['data']['frequency']})", shape="none"
+        )
 
         # Edge between Activity and State
-        self.diagram.edge(activity_node_id, state_node_id)
+        self.diagram.edge(activity_node_name, state_node_name)
 
-        print(f"Node ID: {node['data']['id']}, Path: {path}")
+        # print(f"Node ID: {node['data']['id']}, Path: {path}")
 
         if node["children"]:
             for child_name, child_node in node["children"].items():
                 # Link between State and Node Children
-                self.diagram.edge(state_node_id, str(child_node["data"]["id"]))
+                self.diagram.edge(state_node_name, str(child_node["data"]["id"]))
                 # Keep traversing
-                self.dfs(child_node, child_name, path + "/" + child_name)
+                self.dfs(child_node, child_name)
+
+    def build_state_label(self, node: dict, name: str):
+        label_data = " "
+        for dimension in node["data"].keys():
+            if dimension in ["cost", "time"]:
+                for data_name, measure in node["data"][dimension].items():
+                    label_data += f"{data_name}: {measure}\n"
+                label_data += "--------------\n"
+        return label_data
+
+    def state_label_data(self, node: dict, name: str):
+        pass
+
+    def build_activity_label(self, node: dict, name: str):
+        pass
+
+    def activity_label_data(self, node: dict, name: str):
+        pass
 
     def get_diagram_string(self):
         return self.diagram.source

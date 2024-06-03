@@ -111,11 +111,7 @@ def view_multi_dimension_drt(
     render = src.render(cleanup=True)
     shutil.copyfile(render, tmp_file.name)
 
-    # if not figsize:
-    #     figsize = image_size(multi_perspective_dfg, rankdir)
-
     img = mpimg.imread(tmp_file.name)
-    # plt.figure(figsize=figsize)
     plt.axis("off")
     plt.tight_layout(pad=0, w_pad=0, h_pad=0)
     plt.imshow(img)
