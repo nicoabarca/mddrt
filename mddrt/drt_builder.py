@@ -37,17 +37,14 @@ class DirectlyRootedTreeBuilder:
             case_metrics = cases_metrics.loc[cases_metrics["Case Id"] == case_id].iloc[0]
             cases[case_id]["activities"] = case_activities
             if self.params.calculate_cost:
-                cases[case_id]["cost"] = case_metrics["Cost"]
+                cases[case_id]["cost"] = int(case_metrics["Cost"])
             if self.params.calculate_time:
                 cases[case_id]["time"] = case_metrics["Duration"]
             if self.params.calculate_flexibility:
-                cases[case_id]["flexibility"] = case_metrics["Optionality"]
+                cases[case_id]["flexibility"] = int(case_metrics["Optionality"])
             if self.params.calculate_quality:
-                cases[case_id]["quality"] = case_metrics["Rework"]
+                cases[case_id]["quality"] = int(case_metrics["Rework"])
         self.cases = cases
-
-        print("cases")
-        print(cases["1"])
 
     def build_case_activities(self, case: Tuple[int, pd.DataFrame]) -> list:
         case_activities = []
@@ -57,9 +54,7 @@ class DirectlyRootedTreeBuilder:
             if self.params.calculate_cost:
                 activity_dict["cost"] = activity[self.params.cost_key]
             if self.params.calculate_time:
-                activity_dict["time"] = (
-                    activity[self.params.timestamp_key] - activity[self.params.start_timestamp_key]
-                )
+                activity_dict["time"] = activity[self.params.timestamp_key] - activity[self.params.start_timestamp_key]
             case_activities.append(activity_dict)
         return case_activities
 
@@ -68,6 +63,8 @@ class DirectlyRootedTreeBuilder:
         for _, current_case in self.cases.items():
             remainder_cost = 0
             remainder_time = 0
+            remainder_flexibility = 0
+            remainder_quality = 0
             if self.params.calculate_cost:
                 remainder_cost = current_case["cost"]
             if self.params.calculate_time:
@@ -113,7 +110,6 @@ class DirectlyRootedTreeBuilder:
             self.id_counter += 1
         tree[current_activity]["data"]["frequency"] += 1
 
-        activity_cost = 0
         if self.params.calculate_cost:
             activity_cost = current_case["activities"][depth]["cost"]
 
@@ -149,15 +145,13 @@ class DirectlyRootedTreeBuilder:
             )
 
         if self.params.calculate_flexibility:
-            activity_flexibility = current_case["activities"][depth]["flexibility"]
+            activity_flexibility = current_case["flexibility"]
 
             accumulated_flexibility = accumulated_flexibility + activity_flexibility
             remainder_flexibility = remainder_flexibility - activity_flexibility
 
-            tree[current_activity]["data"]["flexibility"]["total"] += activity_time
-            tree[current_activity]["data"]["flexibility"]["total_case"] += current_case[
-                "flexibility"
-            ]
+            tree[current_activity]["data"]["flexibility"]["total"] += activity_flexibility
+            tree[current_activity]["data"]["flexibility"]["total_case"] += current_case["flexibility"]
             tree[current_activity]["data"]["flexibility"]["accumulated"] += accumulated_flexibility
             tree[current_activity]["data"]["flexibility"]["remainder"] += remainder_flexibility
             tree[current_activity]["data"]["flexibility"]["max"] = max(
@@ -168,7 +162,7 @@ class DirectlyRootedTreeBuilder:
             )
 
         if self.params.calculate_quality:
-            activity_quality = current_case["activities"][depth]["quality"]
+            activity_quality = current_case["quality"]
 
             accumulated_quality = accumulated_quality + activity_quality
             remainder_quality = remainder_quality - activity_quality

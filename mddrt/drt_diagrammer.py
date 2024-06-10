@@ -50,9 +50,7 @@ class DirectlyRootedTreeDiagrammer:
 
         # Activity Node
         activity_node_name = str(node["data"]["id"])
-        self.diagram.node(
-            name=activity_node_name, label=f"{name} ({node['data']['frequency']})", shape="none"
-        )
+        self.diagram.node(name=activity_node_name, label=f"{name} ({node['data']['frequency']})", shape="none")
 
         # Edge between Activity and State
         self.diagram.edge(activity_node_name, state_node_name)
