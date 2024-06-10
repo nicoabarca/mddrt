@@ -129,7 +129,6 @@ class DirectlyRootedTreeBuilder:
 
         if self.params.calculate_time:
             activity_time = current_case["activities"][depth]["time"]
-
             accumulated_time = accumulated_time + activity_time
             remainder_time = remainder_time - activity_time
 
@@ -145,8 +144,7 @@ class DirectlyRootedTreeBuilder:
             )
 
         if self.params.calculate_flexibility:
-            activity_flexibility = current_case["flexibility"]
-
+            activity_flexibility = current_case["flexibility"] / len(current_case["activities"])
             accumulated_flexibility = accumulated_flexibility + activity_flexibility
             remainder_flexibility = remainder_flexibility - activity_flexibility
 
@@ -155,15 +153,14 @@ class DirectlyRootedTreeBuilder:
             tree[current_activity]["data"]["flexibility"]["accumulated"] += accumulated_flexibility
             tree[current_activity]["data"]["flexibility"]["remainder"] += remainder_flexibility
             tree[current_activity]["data"]["flexibility"]["max"] = max(
-                tree[current_activity]["data"]["flexibility"]["max"], activity_flexibility
+                tree[current_activity]["data"]["flexibility"]["max"], current_case["flexibility"]
             )
             tree[current_activity]["data"]["flexibility"]["min"] = min(
-                tree[current_activity]["data"]["flexibility"]["min"], activity_flexibility
+                tree[current_activity]["data"]["flexibility"]["min"], current_case["flexibility"]
             )
 
         if self.params.calculate_quality:
-            activity_quality = current_case["quality"]
-
+            activity_quality = current_case["quality"] / len(current_case["activities"])
             accumulated_quality = accumulated_quality + activity_quality
             remainder_quality = remainder_quality - activity_quality
 
@@ -172,10 +169,10 @@ class DirectlyRootedTreeBuilder:
             tree[current_activity]["data"]["quality"]["accumulated"] += accumulated_quality
             tree[current_activity]["data"]["quality"]["remainder"] += remainder_quality
             tree[current_activity]["data"]["quality"]["max"] = max(
-                tree[current_activity]["data"]["quality"]["max"], activity_quality
+                tree[current_activity]["data"]["quality"]["max"], current_case["quality"]
             )
             tree[current_activity]["data"]["quality"]["min"] = min(
-                tree[current_activity]["data"]["quality"]["min"], activity_quality
+                tree[current_activity]["data"]["quality"]["min"], current_case["quality"]
             )
 
         next_depth = depth + 1

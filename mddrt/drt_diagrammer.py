@@ -1,3 +1,4 @@
+import pandas as pd
 import graphviz
 
 
@@ -67,10 +68,13 @@ class DirectlyRootedTreeDiagrammer:
     def build_state_label(self, node: dict, name: str):
         label_data = " "
         for dimension in node["data"].keys():
-            if dimension in ["cost", "time"]:
+            if dimension in ["cost", "time", "flexibility", "quality"]:
+                label_data += f"------{dimension}--------\n"
                 for data_name, measure in node["data"][dimension].items():
-                    label_data += f"{data_name}: {measure}\n"
-                label_data += "--------------\n"
+                    if dimension in ["time"]:
+                        label_data += f"{data_name}: {measure}\n"
+                    else:
+                        label_data += f"{data_name}: {round(measure, 2)}\n"
         return label_data
 
     def state_label_data(self, node: dict, name: str):
