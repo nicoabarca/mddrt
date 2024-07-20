@@ -14,7 +14,7 @@ def calculate_cases_metrics(
 
     if params.calculate_flexibility and num_mandatory_activities is None:
         mandatory_activities = log.loc[log[params.case_id_key] == case_ids[0]][params.activity_key].unique()
-
+        counter = 0
         for case_id in case_ids:
             log_case = log.loc[log[params.case_id_key] == case_id]
             case_activities = log_case[params.activity_key].unique()
@@ -28,6 +28,8 @@ def calculate_cases_metrics(
                 mandatory_activities = np.delete(
                     mandatory_activities, np.where(mandatory_activities == non_mandatory_activity)
                 )
+            counter += 1
+            print(f"{counter}/{len(case_ids)}")
 
         num_mandatory_activities = len(mandatory_activities)
 

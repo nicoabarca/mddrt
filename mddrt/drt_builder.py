@@ -21,6 +21,7 @@ class DirectlyRootedTreeBuilder:
         self.build()
 
     def build(self) -> None:
+        # TODO: order each case activity by initial timestamp and then order by end timestamp
         cases_grouped_by_id = self.log.groupby(self.params.case_id_key, dropna=True, sort=False)
         self.start_activities = get_start_activities(cases_grouped_by_id, self.params)
         self.end_activities = get_end_activities(cases_grouped_by_id, self.params)
@@ -73,7 +74,6 @@ class DirectlyRootedTreeBuilder:
                 remainder_flexibility = current_case["flexibility"]
             if self.params.calculate_quality:
                 remainder_quality = current_case["quality"]
-
             tree = self.nest_activities(
                 tree=tree,
                 current_case=current_case,
