@@ -1,3 +1,4 @@
+import pandas as pd
 import graphviz
 
 
@@ -50,9 +51,7 @@ class DirectlyRootedTreeDiagrammer:
 
         # Activity Node
         activity_node_name = str(node["data"]["id"])
-        self.diagram.node(
-            name=activity_node_name, label=f"{name} ({node['data']['frequency']})", shape="none"
-        )
+        self.diagram.node(name=activity_node_name, label=f"{name} ({node['data']['frequency']})", shape="none")
 
         # Edge between Activity and State
         self.diagram.edge(activity_node_name, state_node_name)
@@ -69,10 +68,13 @@ class DirectlyRootedTreeDiagrammer:
     def build_state_label(self, node: dict, name: str):
         label_data = " "
         for dimension in node["data"].keys():
-            if dimension in ["cost", "time"]:
+            if dimension in ["cost", "time", "flexibility", "quality"]:
+                label_data += f"------{dimension}--------\n"
                 for data_name, measure in node["data"][dimension].items():
-                    label_data += f"{data_name}: {measure}\n"
-                label_data += "--------------\n"
+                    if dimension in ["time"]:
+                        label_data += f"{data_name}: {measure}\n"
+                    else:
+                        label_data += f"{data_name}: {round(measure, 2)}\n"
         return label_data
 
     def state_label_data(self, node: dict, name: str):

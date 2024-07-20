@@ -10,7 +10,7 @@ class DirectlyRootedTreeParameters:
     cost_key: str = "cost:total"
     calculate_time: bool = True
     calculate_cost: bool = True
-    calculate_rework: bool = True
+    calculate_quality: bool = True
     calculate_flexibility: bool = True
     # ['total', 'consumed', 'remaining']
     node_time_measures: list = field(default_factory=lambda: ["total"])

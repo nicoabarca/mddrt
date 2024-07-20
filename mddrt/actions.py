@@ -13,7 +13,7 @@ def discover_multi_dimension_drt(
     log,
     calculate_time=True,
     calculate_cost=True,
-    calculate_rework=True,
+    calculate_quality=True,
     calculate_flexibility=True,
     node_time_measures=["total"],  # ['total', 'consumed', 'remaining']
     node_cost_measures=["total"],  # ['total', 'consumed', 'remaining']
@@ -44,7 +44,7 @@ def discover_multi_dimension_drt(
         cost_key,
         calculate_time,
         calculate_cost,
-        calculate_rework,
+        calculate_quality,
         calculate_flexibility,
         node_time_measures,
         node_cost_measures,

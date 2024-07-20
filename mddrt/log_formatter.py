@@ -2,9 +2,7 @@ import pandas as pd
 from typing import Union
 
 
-def log_formatter(
-    log: pd.DataFrame, format: dict, timestamp_format: Union[str, None] = None
-):
+def log_formatter(log: pd.DataFrame, format: dict, timestamp_format: Union[str, None] = None):
     """
     Formats the log DataFrame based on the provided format dictionary.
 
@@ -39,12 +37,8 @@ def log_formatter(
     else:
         log = log.rename(columns={format["org:resource"]: "org:resource"})
 
-    log["time:timestamp"] = pd.to_datetime(
-        log["time:timestamp"], utc=True, format=timestamp_format
-    )
-    log["start_timestamp"] = pd.to_datetime(
-        log["start_timestamp"], utc=True, format=timestamp_format
-    )
+    log["time:timestamp"] = pd.to_datetime(log["time:timestamp"], utc=True, format=timestamp_format)
+    log["start_timestamp"] = pd.to_datetime(log["start_timestamp"], utc=True, format=timestamp_format)
 
     log["case:concept:name"] = log["case:concept:name"].astype(str)
     return log

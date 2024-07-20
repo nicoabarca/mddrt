@@ -13,9 +13,7 @@ def calculate_cases_metrics(
     case_ids = sorted(log[params.case_id_key].unique())
 
     if params.calculate_flexibility and num_mandatory_activities is None:
-        mandatory_activities = log.loc[log[params.case_id_key] == case_ids[0]][
-            params.activity_key
-        ].unique()
+        mandatory_activities = log.loc[log[params.case_id_key] == case_ids[0]][params.activity_key].unique()
 
         for case_id in case_ids:
             log_case = log.loc[log[params.case_id_key] == case_id]
@@ -51,15 +49,14 @@ def calculate_cases_metrics(
         if params.calculate_cost:
             case_metrics["Cost"] = log_case[params.cost_key].sum()
 
-        if params.calculate_rework or params.calculate_flexibility:
+        if params.calculate_quality or params.calculate_flexibility:
             unique_activities = log_case[params.activity_key].unique()
             num_unique_activities = len(unique_activities)
 
-            if params.calculate_rework:
+            if params.calculate_quality:
                 case_metrics["Rework"] = len(log_case) - num_unique_activities
 
             if params.calculate_flexibility:
-                # TODO:
                 case_metrics["Optionality"] = num_unique_activities - num_mandatory_activities
 
             case_metrics["Optional Activities"] = num_unique_activities - num_mandatory_activities
@@ -67,14 +64,17 @@ def calculate_cases_metrics(
             case_metrics["Total Activities"] = len(log_case)
 
         log_metrics.append(case_metrics)
+    log_metrics = pd.DataFrame(log_metrics)
 
-    return pd.DataFrame(log_metrics)
+    print(log_metrics)
+    print("sum Rework", sum(log_metrics["Rework"]))
+    print("sum Optionality", sum(log_metrics["Optionality"]))
+
+    return log_metrics
 
 
 def get_start_activities(cases_grouped_by_id: pd.DataFrame, params: DirectlyRootedTreeParameters):
-    start_activities = [
-        *dict(cases_grouped_by_id[params.activity_key].first().value_counts()).keys()
-    ]
+    start_activities = [*dict(cases_grouped_by_id[params.activity_key].first().value_counts()).keys()]
     return start_activities
 
 
@@ -87,17 +87,24 @@ def create_case_data(params: DirectlyRootedTreeParameters, id: int):
     case_data = {}
     case_data["frequency"] = 0
     case_data["id"] = id
+    data = {
+        "total": 0,
+        "total_case": 0,
+        "remainder": 0,
+        "accumulated": 0,
+        "statistic": 0,
+        "max": 0,
+        "min": maxsize,
+    }
     if params.calculate_cost:
-        data = {
-            "total": 0,
-            "total_case": 0,
-            "remainder": 0,
-            "accumulated": 0,
-            "statistic": 0,
-            "max": 0,
-            "min": maxsize,
-        }
-        case_data["cost"] = data
+        case_data["cost"] = data.copy()
+
+    if params.calculate_quality:
+        case_data["quality"] = data.copy()
+
+    if params.calculate_flexibility:
+        case_data["flexibility"] = data.copy()
+
     if params.calculate_time:
         data = {
             "total": pd.Timedelta(days=0),
