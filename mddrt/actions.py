@@ -3,10 +3,11 @@ import matplotlib.image as mpimg
 import tempfile
 import shutil
 from graphviz import Source
+from mddrt.node.node import Node
 from mddrt.utils.actions import save_graphviz_diagram
 from mddrt.drt_parameters import DirectlyRootedTreeParameters
-from mddrt.drt_diagrammer import DirectlyRootedTreeDiagrammer
-from mddrt.drt_builder import DirectlyRootedTreeBuilder
+from mddrt.tree_diagrammer import DirectlyRootedTreeDiagrammer
+from mddrt.tree_builder import DirectlyRootedTreeBuilder
 
 
 def discover_multi_dimension_drt(
@@ -82,31 +83,43 @@ def group_log_activities(
 
 
 def get_multi_dimension_drt_string(
-    multi_dimension_drt: dict,
+    multi_dimension_drt: Node,
     visualize_time: bool = True,
     visualize_cost: bool = True,
-    visualize_rework: bool = True,
+    visualize_quality: bool = True,
     visualize_flexibility: bool = True,
 ):
-    diagrammer = DirectlyRootedTreeDiagrammer(multi_dimension_drt)
+    diagrammer = DirectlyRootedTreeDiagrammer(
+        multi_dimension_drt,
+        visualize_time=visualize_time,
+        visualize_cost=visualize_cost,
+        visualize_quality=visualize_quality,
+        visualize_flexibility=visualize_flexibility,
+    )
     drt_string = diagrammer.get_diagram_string()
 
     return drt_string
 
 
 def view_multi_dimension_drt(
-    multi_dimension_drt,
+    multi_dimension_drt: Node,
     visualize_time=True,
     visualize_cost=True,
-    visualize_rework=True,
+    visualize_quality=True,
     visualize_flexibility=True,
     format="png",
 ):
-    drt_string = get_multi_dimension_drt_string(multi_dimension_drt)
+    drt_string = get_multi_dimension_drt_string(
+        multi_dimension_drt,
+        visualize_time=visualize_time,
+        visualize_cost=visualize_cost,
+        visualize_quality=visualize_quality,
+        visualize_flexibility=visualize_flexibility,
+    )
 
     tmp_file = tempfile.NamedTemporaryFile(suffix=".gv")
     tmp_file.close()
-    src = Source(drt_string, tmp_file.name, format="png")
+    src = Source(drt_string, tmp_file.name, format=format)
 
     render = src.render(cleanup=True)
     shutil.copyfile(render, tmp_file.name)
@@ -123,9 +136,15 @@ def save_vis_dimension_drt(
     file_path,
     visualize_time=True,
     visualize_cost=True,
-    visualize_rework=True,
+    visualize_quality=True,
     visualize_flexibility=True,
     format="png",
 ):
-    drt_string = get_multi_dimension_drt_string(multi_dimension_drt)
+    drt_string = get_multi_dimension_drt_string(
+        multi_dimension_drt,
+        visualize_time=visualize_time,
+        visualize_cost=visualize_cost,
+        visualize_quality=visualize_quality,
+        visualize_flexibility=visualize_flexibility,
+    )
     save_graphviz_diagram(drt_string, file_path, format)
