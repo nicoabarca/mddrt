@@ -5,10 +5,10 @@ from datetime import timedelta
 
 class DirectedRootedTreeGrouper:
     def __init__(self, tree: Node) -> None:
-        self.tree = tree
+        self.tree: Node = tree
         self.start_group()
 
-    def start_group(self):
+    def start_group(self) -> None:
         for child in self.tree.children:
             self.traverse_to_group(child)
 
@@ -28,21 +28,23 @@ class DirectedRootedTreeGrouper:
         for child in actual_node.children:
             self.traverse_to_group(child)
 
-    def group_nodes(self, parent_node: Node, nodes: List[Node]) -> Node:
+    def group_nodes(self, parent_node: Node, nodes: List[Node]) -> None:
         new_node = Node(f"From {nodes[0].name} to {nodes[-1].name}", nodes[0].depth)
         self.group_dimensions_data_in_new_node(new_node, nodes)
         first_node_index = parent_node.children.index(nodes[0])
         parent_node.children[first_node_index] = new_node
         new_node.children = nodes[-1].children
 
-    def group_dimensions_data_in_new_node(self, grouped_node: Node, nodes: List[Node]):
+    def group_dimensions_data_in_new_node(self, grouped_node: Node, nodes: List[Node]) -> None:
         grouped_node.frequency = nodes[0].frequency
         for dimension in nodes[0].dimensions_data.keys():
             default = 0 if dimension != "time" else timedelta()
-            for metric in ["total", "total_case", "accumulated", "remainder"]:
-                grouped_node.dimensions_data[dimension][metric] = sum(
-                    [node.dimensions_data[dimension][metric] for node in nodes], default
-                )
+            grouped_node.dimensions_data[dimension]["total_case"] = nodes[0].dimensions_data[dimension]["total_case"]
+            grouped_node.dimensions_data[dimension]["accumulated"] = nodes[-1].dimensions_data[dimension]["accumulated"]
+            grouped_node.dimensions_data[dimension]["remainder"] = nodes[-1].dimensions_data[dimension]["remainder"]
+            grouped_node.dimensions_data[dimension]["total"] = sum(
+                [node.dimensions_data[dimension]["total"] for node in nodes], default
+            )
             grouped_node.dimensions_data[dimension]["min"] = min(
                 node.dimensions_data[dimension]["min"] for node in nodes
             )
