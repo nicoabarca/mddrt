@@ -1,4 +1,6 @@
+from typing import Tuple, Literal, List, Dict, Union
 from datetime import timedelta
+from mddrt.node.node import Node
 from mddrt.utils.color_schemes import (
     FREQUENCY_COLOR_SCHEME,
     TIME_COLOR_SCHEME,
@@ -6,38 +8,59 @@ from mddrt.utils.color_schemes import (
     QUALITY_COLOR_SCHEME,
     FLEXIBILITY_COLOR_SCHEME,
 )
+from collections import deque
 
 
-# TODO: check if this function works for this graph
-def dimensions_min_and_max(activities, connections):
-    activities_dimensions = next(iter(activities.values())).keys()
-    connections_dimensions = next(iter(connections.values())).keys()
-    dimensions_min_and_max = {key: (0, 0) for key in activities_dimensions}
+def dimensions_min_and_max(tree_root: Node) -> Dict[str, List[int]]:
+    dimensions_min_and_max = {"frequency": [0, 0]}
+    for dimension in tree_root.dimensions_data:
+        dimensions_min_and_max[dimension] = [0, 0]
 
-    for dim in activities_dimensions:
-        min_val = min((activity[dim] for activity in activities.values()))
-        max_val = max((activity[dim] for activity in activities.values()))
-        dimensions_min_and_max[dim] = (min_val, max_val)
+    queue = deque([tree_root])
 
-    for dim in connections_dimensions:
-        min_val = min((connection[dim] for connection in connections.values()))
-        max_val = max((connection[dim] for connection in connections.values()))
-        prev_min_val = dimensions_min_and_max[dim][0]
-        prev_max_val = dimensions_min_and_max[dim][1]
-        dimensions_min_and_max[dim] = (min(prev_min_val, min_val), max(prev_max_val, max_val))
+    while queue:
+        current_node = queue.popleft()
+
+        dimensions_min_and_max["frequency"][0] = min(dimensions_min_and_max["frequency"][0], current_node.frequency)
+        dimensions_min_and_max["frequency"][1] = max(dimensions_min_and_max["frequency"][0], current_node.frequency)
+
+        for dimension, data in current_node.dimensions_data.items():
+            dimension_avg_total_case = (
+                data["total_case"] / current_node.frequency
+                if dimension != "time"
+                else (data["total_case"] / current_node.frequency).total_seconds()
+            )
+            dimensions_min_and_max[dimension][0] = min(dimensions_min_and_max[dimension][0], dimension_avg_total_case)
+            dimensions_min_and_max[dimension][1] = max(dimensions_min_and_max[dimension][0], dimension_avg_total_case)
+
+        for child in current_node.children:
+            queue.append(child)
 
     return dimensions_min_and_max
 
 
-def background_color(measure, dimension, dimension_scale):
-    colors_palette_scale = (90, 255)
-    color_palette = color_scheme_by_dimension(dimension)
-    assigned_color_index = round(interpolated_value(measure, dimension_scale, colors_palette_scale))
-    return color_palette[assigned_color_index]
+def background_color(
+    measure: Union[timedelta, int],
+    dimension: Literal["frequency", "cost", "time", "flexibility", "quality"],
+    dimension_scale: Tuple[int, int],
+) -> str:
+    if isinstance(measure, timedelta):
+        measure = measure.total_seconds()
+    color_scheme_range = (90, 255)
+    color_scheme = color_scheme_by_dimension(dimension)
+    assigned_color_index = interpolated_value(measure, dimension_scale, color_scheme_range)
+    return color_scheme[assigned_color_index]
 
 
-def color_scheme_by_dimension(dimension):
-    color_scheme = None
+def interpolated_value(measure: int, from_scale: Tuple[int, int], to_scale: Tuple[int, int]) -> int:
+    measure = max(min(measure, from_scale[1]), from_scale[0])
+    denominator = max(1, (from_scale[1] - from_scale[0]))
+    normalized_value = (measure - from_scale[0]) / denominator
+    interpolated_value = to_scale[0] + normalized_value * (to_scale[1] - to_scale[0])
+    return round(interpolated_value)
+
+
+def color_scheme_by_dimension(dimension: Literal["frequency", "cost", "time", "flexibility", "quality"]) -> List[str]:
     dimension_color_schemes = {
         "frequency": FREQUENCY_COLOR_SCHEME,
         "cost": COST_COLOR_SCHEME,
@@ -45,26 +68,16 @@ def color_scheme_by_dimension(dimension):
         "flexibility": FLEXIBILITY_COLOR_SCHEME,
         "quality": QUALITY_COLOR_SCHEME,
     }
-    color_scheme = dimension_color_schemes.get(dimension)
-    return color_scheme
+    return dimension_color_schemes.get(dimension)
 
 
-def interpolated_value(measure, from_scale, to_scale):
-    measure = max(min(measure, from_scale[1]), from_scale[0])
-    denominator = max(1, (from_scale[1] - from_scale[0]))
-    normalized_value = (measure - from_scale[0]) / denominator
-    interpolated_value = to_scale[0] + normalized_value * (to_scale[1] - to_scale[0])
-    return interpolated_value
-
-
-def format_time(total_seconds):
-    delta = timedelta(seconds=total_seconds)
-    years = round(delta.days // 365)
-    months = round((delta.days % 365) // 30)
-    days = round((delta.days % 365) % 30)
-    hours = round(delta.seconds // 3600)
-    minutes = round((delta.seconds % 3600) // 60)
-    seconds = round(delta.seconds % 60)
+def format_time(time: timedelta) -> str:
+    years = round(time.days // 365)
+    months = round((time.days % 365) // 30)
+    days = round((time.days % 365) % 30)
+    hours = round(time.seconds // 3600)
+    minutes = round((time.seconds % 3600) // 60)
+    seconds = round(time.seconds % 60)
 
     if years > 0:
         return "{:02d}y {:02d}m {:02d}d ".format(years, months, days)
@@ -79,3 +92,22 @@ def format_time(total_seconds):
     if seconds > 0:
         return "{:02d}s".format(seconds)
     return "Instant"
+
+
+def dimensions_to_diagram(time: bool, cost: bool, quality: bool, flexibility: bool) -> List[str]:
+    dimensions_to_diagram = []
+    if time:
+        dimensions_to_diagram.append("time")
+    if cost:
+        dimensions_to_diagram.append("cost")
+    if quality:
+        dimensions_to_diagram.append("quality")
+    if flexibility:
+        dimensions_to_diagram.append("flexibility")
+    return dimensions_to_diagram
+
+
+def link_width(measure: int, dimension_scale: List[int]):
+    width_scale = (1, 8)
+    link_width = round(interpolated_value(measure, dimension_scale, width_scale), 2)
+    return link_width

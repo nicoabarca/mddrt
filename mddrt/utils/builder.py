@@ -3,6 +3,8 @@ import numpy as np
 from datetime import timedelta
 from sys import maxsize
 from mddrt.drt_parameters import DirectlyRootedTreeParameters
+from typing import Dict, Literal, List, Union
+from itertools import accumulate
 
 
 def calculate_cases_metrics(
@@ -29,7 +31,7 @@ def calculate_cases_metrics(
                     mandatory_activities, np.where(mandatory_activities == non_mandatory_activity)
                 )
             counter += 1
-            print(f"{counter}/{len(case_ids)}")
+            # print(f"{counter}/{len(case_ids)}")
 
         num_mandatory_activities = len(mandatory_activities)
 
@@ -68,9 +70,9 @@ def calculate_cases_metrics(
         log_metrics.append(case_metrics)
     log_metrics = pd.DataFrame(log_metrics)
 
-    print(log_metrics)
-    print("sum Rework", sum(log_metrics["Rework"]))
-    print("sum Optionality", sum(log_metrics["Optionality"]))
+    # print(log_metrics)
+    # print("sum Rework", sum(log_metrics["Rework"]))
+    # print("sum Optionality", sum(log_metrics["Optionality"]))
 
     return log_metrics
 
@@ -85,37 +87,56 @@ def get_end_activities(cases_grouped_by_id: pd.DataFrame, params: DirectlyRooted
     return end_activities
 
 
-def create_case_data(params: DirectlyRootedTreeParameters, id: int):
-    case_data = {}
-    case_data["frequency"] = 0
-    case_data["id"] = id
+def create_dimensions_data():
     data = {
         "total": 0,
         "total_case": 0,
         "remainder": 0,
         "accumulated": 0,
-        "statistic": 0,
         "max": 0,
         "min": maxsize,
     }
-    if params.calculate_cost:
-        case_data["cost"] = data.copy()
+    case_data = {}
+    case_data["cost"] = data.copy()
 
-    if params.calculate_quality:
-        case_data["quality"] = data.copy()
+    case_data["quality"] = data.copy()
 
-    if params.calculate_flexibility:
-        case_data["flexibility"] = data.copy()
+    case_data["flexibility"] = data.copy()
 
-    if params.calculate_time:
-        data = {
-            "total": pd.Timedelta(days=0),
-            "total_case": pd.Timedelta(days=0),
-            "remainder": pd.Timedelta(days=0),
-            "accumulated": pd.Timedelta(days=0),
-            "statistic": pd.Timedelta(days=0),
-            "max": pd.Timedelta(days=0),
-            "min": timedelta(microseconds=2**63 - 1),
-        }
-        case_data["time"] = data
+    data = {
+        "total": pd.Timedelta(days=0),
+        "total_case": pd.Timedelta(days=0),
+        "remainder": pd.Timedelta(days=0),
+        "accumulated": pd.Timedelta(days=0),
+        "max": pd.Timedelta(days=0),
+        "min": timedelta(microseconds=2**63 - 1),
+    }
+    case_data["time"] = data
     return case_data
+
+
+def activities_dimension_cumsum(
+    current_case: dict, dimension: Literal["cost", "time", "flexibility", "quality"]
+) -> List[Union[int, pd.Timedelta]]:
+    activities = current_case["activities"]
+    dimension_data = None
+    if dimension == "cost" or dimension == "time":
+        dimension_data = [item[dimension] for item in activities]
+    else:
+        dimension_data = [current_case[dimension] / len(current_case["activities"])] * len(current_case["activities"])
+
+    return list(accumulate(dimension_data))
+
+
+def dimensions_to_calculate(params: DirectlyRootedTreeParameters) -> List[str]:
+    dimensions_to_calculate = []
+    if params.calculate_cost:
+        dimensions_to_calculate.append("cost")
+    if params.calculate_time:
+        dimensions_to_calculate.append("time")
+    if params.calculate_flexibility:
+        dimensions_to_calculate.append("flexibility")
+    if params.calculate_quality:
+        dimensions_to_calculate.append("quality")
+
+    return dimensions_to_calculate
