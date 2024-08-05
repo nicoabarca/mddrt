@@ -1,7 +1,6 @@
 import os
 import pandas as pd
 import mddrt
-from mddrt.utils.misc import bfs
 
 blasting_log_path = os.path.join("data", "blasting_with_rework_event_log.csv")
 blasting_event_log = pd.read_csv(blasting_log_path, sep=";")
@@ -45,9 +44,7 @@ drt = mddrt.discover_multi_dimension_drt(
     calculate_time=True,
     calculate_flexibility=True,
     calculate_quality=True,
+    group_activities=True,
 )
-
-bfs(drt, write_to_file=True)
-# breakpoint()
 
 mddrt.save_vis_dimension_drt(drt, file_path=os.path.join("data", "diagram"))

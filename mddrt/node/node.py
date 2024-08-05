@@ -12,11 +12,15 @@ class Node:
         self.depth: int = depth
         self.frequency: int = 0
         self.dimensions_data: Dict[Literal["cost", "time", "flexibility", "quality"], dict] = create_dimensions_data()
+        self.parent: Node = None
         self.children: List["Node"] = []
         Node.id += 1
 
     def add_children(self, node: "Node") -> None:
         self.children.append(node)
+
+    def set_parent(self, parent_node: "Node") -> None:
+        self.parent = parent_node
 
     def get_child_by_name_and_depth(self, name: str, depth: int) -> Union["Node", None]:
         for child in self.children:
@@ -60,6 +64,7 @@ Id: {self.id}
 Name: {self.name}
 Depth: {self.depth}
 Freq: {self.frequency}
+Parent: {self.parent.name if self.parent else None} {self.parent.id if self.parent else None}
 Data: \n{pretty_format_dict(self.dimensions_data)}
 """
         return string

@@ -83,7 +83,7 @@ class DirectlyRootedTreeDiagrammer:
         return GRAPHVIZ_STATE_NODE_ROW.format(bg_color, dimension_row)
 
     def build_link_label(self, node: Node) -> str:
-        content = f"{node.name} ({node.frequency})"
+        content = GRAPHVIZ_ACTIVITY_DATA.format(f"{node.name} ({node.frequency})")
         for dimension in self.dimensions_to_diagram:
             content += self.build_link_string(dimension, node)
         return GRAPHVIZ_ACTIVITY.format(content)

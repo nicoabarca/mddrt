@@ -8,6 +8,7 @@ from mddrt.utils.actions import save_graphviz_diagram
 from mddrt.drt_parameters import DirectlyRootedTreeParameters
 from mddrt.tree_diagrammer import DirectlyRootedTreeDiagrammer
 from mddrt.tree_builder import DirectlyRootedTreeBuilder
+from mddrt.tree_grouper import DirectedRootedTreeGrouper
 
 
 def discover_multi_dimension_drt(
@@ -63,10 +64,10 @@ def discover_multi_dimension_drt(
     return multi_dimension_drt
 
 
-def group_drt_activities(multi_dimension_drt):
+def group_drt_activities(multi_dimension_drt: Node):
     # Agrupación automática de secuencias de actividades sin caminos alternativos
-
-    return multi_dimension_drt
+    grouper = DirectedRootedTreeGrouper(multi_dimension_drt)
+    return grouper.get_tree()
 
 
 def group_log_activities(

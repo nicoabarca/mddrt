@@ -8,12 +8,11 @@ from mddrt.node.node import Node
 
 class DirectlyRootedTreeBuilder:
     def __init__(self, log: pd.DataFrame, params: DirectlyRootedTreeParameters) -> None:
-        self.log = log
-        self.params = params
-        self.id_counter = 0
-        self.tree = None
-        self.cases = None
-        self.dimensions_to_calculate = dimensions_to_calculate(params)
+        self.log: pd.DataFrame = log
+        self.params: DirectlyRootedTreeParameters = params
+        self.tree: Node = None
+        self.cases: dict = None
+        self.dimensions_to_calculate: dict = dimensions_to_calculate(params)
         self.build()
 
     def build(self) -> None:
@@ -57,6 +56,7 @@ class DirectlyRootedTreeBuilder:
                 current_node = parent_node.get_child_by_name_and_depth(activity["name"], depth)
                 if not current_node:
                     current_node = Node(activity["name"], depth)
+                    current_node.set_parent(parent_node)
                     parent_node.add_children(current_node)
 
                 current_node.update_frequency()
@@ -67,7 +67,7 @@ class DirectlyRootedTreeBuilder:
 
         self.tree = root
 
-    def update_root(self):
+    def update_root(self) -> None:
         self.tree.frequency = sum(node.frequency for node in self.tree.children)
         for dimension in self.dimensions_to_calculate:
             default = 0 if dimension != "time" else timedelta()
