@@ -1,3 +1,4 @@
+import os
 from collections import deque
 
 
@@ -26,7 +27,7 @@ def bfs(root, write_to_file=False):
     while queue:
         current_node = queue.popleft()
         if write_to_file:
-            with open("data/new_tree.txt", "+a") as f:
+            with open(os.path.join("data", "new_tree.txt"), "+a") as f:
                 f.write(str(current_node))
 
         for child in current_node.children:

@@ -3,7 +3,7 @@ import numpy as np
 from datetime import timedelta
 from sys import maxsize
 from mddrt.drt_parameters import DirectlyRootedTreeParameters
-from typing import Dict, Literal, List, Union
+from typing import Literal, List, Union
 from itertools import accumulate
 
 
@@ -31,7 +31,6 @@ def calculate_cases_metrics(
                     mandatory_activities, np.where(mandatory_activities == non_mandatory_activity)
                 )
             counter += 1
-            # print(f"{counter}/{len(case_ids)}")
 
         num_mandatory_activities = len(mandatory_activities)
 
@@ -70,10 +69,6 @@ def calculate_cases_metrics(
         log_metrics.append(case_metrics)
     log_metrics = pd.DataFrame(log_metrics)
 
-    # print(log_metrics)
-    # print("sum Rework", sum(log_metrics["Rework"]))
-    # print("sum Optionality", sum(log_metrics["Optionality"]))
-
     return log_metrics
 
 
@@ -88,6 +83,7 @@ def get_end_activities(cases_grouped_by_id: pd.DataFrame, params: DirectlyRooted
 
 
 def create_dimensions_data():
+    case_data = {}
     data = {
         "total": 0,
         "total_case": 0,
@@ -96,13 +92,9 @@ def create_dimensions_data():
         "max": 0,
         "min": maxsize,
     }
-    case_data = {}
     case_data["cost"] = data.copy()
-
     case_data["quality"] = data.copy()
-
     case_data["flexibility"] = data.copy()
-
     data = {
         "total": pd.Timedelta(days=0),
         "total_case": pd.Timedelta(days=0),
@@ -120,7 +112,7 @@ def activities_dimension_cumsum(
 ) -> List[Union[int, pd.Timedelta]]:
     activities = current_case["activities"]
     dimension_data = None
-    if dimension == "cost" or dimension == "time":
+    if dimension in ["cost", "time"]:
         dimension_data = [item[dimension] for item in activities]
     else:
         dimension_data = [current_case[dimension] / len(current_case["activities"])] * len(current_case["activities"])

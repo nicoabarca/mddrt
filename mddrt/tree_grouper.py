@@ -38,12 +38,12 @@ class DirectedRootedTreeGrouper:
     def group_dimensions_data_in_new_node(self, grouped_node: Node, nodes: List[Node]) -> None:
         grouped_node.frequency = nodes[0].frequency
         for dimension in nodes[0].dimensions_data.keys():
-            default = 0 if dimension != "time" else timedelta()
+            default_zero = 0 if dimension != "time" else timedelta()
             grouped_node.dimensions_data[dimension]["total_case"] = nodes[0].dimensions_data[dimension]["total_case"]
             grouped_node.dimensions_data[dimension]["accumulated"] = nodes[-1].dimensions_data[dimension]["accumulated"]
             grouped_node.dimensions_data[dimension]["remainder"] = nodes[-1].dimensions_data[dimension]["remainder"]
             grouped_node.dimensions_data[dimension]["total"] = sum(
-                [node.dimensions_data[dimension]["total"] for node in nodes], default
+                [node.dimensions_data[dimension]["total"] for node in nodes], default_zero
             )
             grouped_node.dimensions_data[dimension]["min"] = min(
                 node.dimensions_data[dimension]["min"] for node in nodes

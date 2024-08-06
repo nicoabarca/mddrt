@@ -50,11 +50,11 @@ class DirectlyRootedTreeDiagrammer:
             for child in current_node.children:
                 queue.append(child)
 
-    def build_node(self, node: Node):
+    def build_node(self, node: Node) -> None:
         state_label = self.build_state_label(node)
         self.diagram.node(str(node.id), label=f"<{state_label}>", shape="none")
 
-    def build_links(self, node: Node):
+    def build_links(self, node: Node) -> None:
         for child in node.children:
             link_label = self.build_link_label(child)
             penwidth = link_width(child.frequency, self.dimensions_min_and_max["frequency"])
@@ -114,9 +114,9 @@ class DirectlyRootedTreeDiagrammer:
         if dimension == "time":
             return format_time(value)
         elif dimension == "cost":
-            return f"{round(value, 2)} USD"
+            return f"{abs(round(value, 2))} USD"
 
-        return round(value, 2)
+        return abs(round(value, 2))
 
     def get_diagram_string(self) -> str:
         return self.diagram.source

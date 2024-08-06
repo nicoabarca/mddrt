@@ -65,6 +65,10 @@ class DirectlyRootedTreeBuilder:
                     current_node.update_dimensions_data(dimension, depth, current_case)
                 parent_node = current_node
 
+                # debug only code
+                print(parent_node)
+            breakpoint()
+
         self.tree = root
 
     def update_root(self) -> None:
