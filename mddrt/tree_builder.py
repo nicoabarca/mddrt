@@ -37,13 +37,17 @@ class DirectlyRootedTreeBuilder:
 
     def build_case_activities(self, case: Tuple[int, pd.DataFrame]) -> list:
         case_activities = []
-        for _, activity in case[1].iterrows():
+        case_df = case[1]
+        for i in range(len(case_df)):
+            actual_activity = case_df.iloc[i]
             activity_dict = {}
-            activity_dict["name"] = activity[self.params.activity_key]
+            activity_dict["name"] = actual_activity[self.params.activity_key]
             if self.params.calculate_cost:
-                activity_dict["cost"] = activity[self.params.cost_key]
+                activity_dict["cost"] = actual_activity[self.params.cost_key]
             if self.params.calculate_time:
-                activity_dict["time"] = activity[self.params.timestamp_key] - activity[self.params.start_timestamp_key]
+                next_activity = case_df.iloc[i + 1] if i < len(case[1]) - 1 else case[1].iloc[i]
+                end_timestamp = self.params.start_timestamp_key if i < len(case[1]) - 1 else self.params.timestamp_key
+                activity_dict["time"] = next_activity[end_timestamp] - actual_activity[self.params.start_timestamp_key]
             case_activities.append(activity_dict)
         return case_activities
 
@@ -64,11 +68,6 @@ class DirectlyRootedTreeBuilder:
                 for dimension in self.dimensions_to_calculate:
                     current_node.update_dimensions_data(dimension, depth, current_case)
                 parent_node = current_node
-
-                # debug only code
-                print(parent_node)
-            breakpoint()
-
         self.tree = root
 
     def update_root(self) -> None:

@@ -52,23 +52,12 @@ class Node:
         dimension_to_update["accumulated"] += dimension_cumsum[depth]
         dimension_to_update["remainder"] = dimension_to_update["total_case"] - dimension_to_update["accumulated"]
 
-        if depth == len(current_case["activities"]) - 1:
-            print("dimension", dimension)
-            print("dimension cum sum depth", dimension_cumsum[depth], depth)
-            print("total", dimension_to_update["total"])
-            print("total_case", dimension_to_update["total_case"])
-            print("accumulated", dimension_to_update["accumulated"])
-            print("remainder", dimension_to_update["remainder"])
-
         if dimension in ["cost", "time"]:
             dimension_to_update["max"] = max(dimension_to_update["max"], activity_dimension_value)
             dimension_to_update["min"] = min(dimension_to_update["min"], activity_dimension_value)
         else:
             dimension_to_update["max"] = max(dimension_to_update["max"], current_case[dimension])
             dimension_to_update["min"] = min(dimension_to_update["min"], current_case[dimension])
-
-        if dimension == "time":
-            breakpoint()
 
     def __str__(self) -> str:
         string = f"""

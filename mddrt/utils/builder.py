@@ -72,17 +72,17 @@ def calculate_cases_metrics(
     return log_metrics
 
 
-def get_start_activities(cases_grouped_by_id: pd.DataFrame, params: DirectlyRootedTreeParameters):
+def get_start_activities(cases_grouped_by_id: pd.DataFrame, params: DirectlyRootedTreeParameters) -> List[dict]:
     start_activities = [*dict(cases_grouped_by_id[params.activity_key].first().value_counts()).keys()]
     return start_activities
 
 
-def get_end_activities(cases_grouped_by_id: pd.DataFrame, params: DirectlyRootedTreeParameters):
+def get_end_activities(cases_grouped_by_id: pd.DataFrame, params: DirectlyRootedTreeParameters) -> List[dict]:
     end_activities = [*dict(cases_grouped_by_id[params.activity_key].last().value_counts()).keys()]
     return end_activities
 
 
-def create_dimensions_data():
+def create_dimensions_data() -> dict:
     case_data = {}
     data = {
         "total": 0,

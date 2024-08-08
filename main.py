@@ -49,9 +49,6 @@ drt_normal = mddrt.discover_multi_dimension_drt(
     calculate_quality=True,
     group_activities=False,
 )
-bfs(drt_normal, write_to_file=True)
-
-mddrt.save_vis_dimension_drt(drt_normal, file_path=os.path.join("data", "test_diagram"))
 
 drt_grouped = mddrt.discover_multi_dimension_drt(
     blasting_event_log,

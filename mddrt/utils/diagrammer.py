@@ -89,9 +89,8 @@ def format_time(time: timedelta) -> str:
         return "{:02d}h {:02d}m {:02d}s ".format(hours, minutes, seconds)
     if minutes > 0:
         return "{:02d}m {:02d}s".format(minutes, seconds)
-    if seconds > 0:
+    if seconds >= 0:
         return "{:02d}s".format(seconds)
-    return "Instant"
 
 
 def dimensions_to_diagram(time: bool, cost: bool, quality: bool, flexibility: bool) -> List[str]:
