@@ -1,14 +1,16 @@
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-import tempfile
 import shutil
+import tempfile
+
+import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
 from graphviz import Source
-from mddrt.node.node import Node
-from mddrt.utils.actions import save_graphviz_diagram
+
 from mddrt.drt_parameters import DirectlyRootedTreeParameters
-from mddrt.tree_diagrammer import DirectlyRootedTreeDiagrammer
+from mddrt.node.node import Node
 from mddrt.tree_builder import DirectlyRootedTreeBuilder
+from mddrt.tree_diagrammer import DirectlyRootedTreeDiagrammer
 from mddrt.tree_grouper import DirectedRootedTreeGrouper
+from mddrt.utils.actions import save_graphviz_diagram
 
 
 def discover_multi_dimension_drt(
@@ -19,14 +21,8 @@ def discover_multi_dimension_drt(
     calculate_flexibility=True,
     node_time_measures=["total"],  # ['total', 'consumed', 'remaining']
     node_cost_measures=["total"],  # ['total', 'consumed', 'remaining']
-    # rework y flexibility solo pueden ser medidas a nivel de todo el caso
-    node_time_measure_aggregation="mean",  # mean, median, sum, max, min, stdev
-    node_cost_measure_aggregation="mean",  # mean, median, sum, max, min, stdev
-    node_rework_measure_aggregation="mean",  # mean, median, max, min, stdev
-    node_flexibility_measure_aggregation="mean",  # mean, median, max, min, stdev
     arc_time_measures=["mean"],  # ['mean', 'median', 'sum', 'max', 'min', 'stdev']
     arc_cost_measures=["mean"],  # ['mean', 'median', 'sum', 'max', 'min', 'stdev']
-    # rework y flexibility solo pueden ser medidas a nivel de todo el caso
     group_activities=False,  # si True, ejecutar función para agrupar secuencias de actividades sin caminos alternativos
     case_id_key="case:concept:name",
     activity_key="concept:name",
@@ -34,10 +30,6 @@ def discover_multi_dimension_drt(
     start_timestamp_key="start_timestamp",
     cost_key="cost:total",
 ):
-    # Ejemplo de output para el DRT generada con la versión actual de la herramienta
-    # La nueva versión no tiene que ser exactamente igual, especialmente los nombres de los atributos se podrían refinar
-    # La estructura se obtuvo con un código recursivo, pero no es necesario que la nueva versión lo sea
-
     parameters = DirectlyRootedTreeParameters(
         case_id_key,
         activity_key,
@@ -50,10 +42,6 @@ def discover_multi_dimension_drt(
         calculate_flexibility,
         node_time_measures,
         node_cost_measures,
-        node_time_measure_aggregation,
-        node_cost_measure_aggregation,
-        node_rework_measure_aggregation,
-        node_flexibility_measure_aggregation,
         arc_time_measures,
         arc_cost_measures,
     )
@@ -65,7 +53,6 @@ def discover_multi_dimension_drt(
 
 
 def group_drt_activities(multi_dimension_drt: Node):
-    # Agrupación automática de secuencias de actividades sin caminos alternativos
     grouper = DirectedRootedTreeGrouper(multi_dimension_drt)
     return grouper.get_tree()
 

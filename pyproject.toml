@@ -1,13 +1,7 @@
 [project]
 name = "mddrt"
 version = "0.0.1"
-dependencies = [
-  "pandas",
-  "numpy",
-  "matplotlib",
-  "pyarrow",
-  "graphviz",
-]
+dependencies = ["pandas", "numpy", "matplotlib", "pyarrow", "graphviz"]
 
 description = "Package for Multi-Dimension Directly Rooted Trees visualization"
 readme = "README.md"
@@ -19,7 +13,7 @@ classifiers = [
     'Intended Audience :: Science/Research',
     'Topic :: Scientific/Engineering :: Visualization',
 ]
-license = {file = "LICENSE"}
+license = { file = "LICENSE" }
 
 [project.urls]
 Homepage = "https://github.com/nicoabarca/mpdrt"
@@ -109,3 +103,8 @@ docstring-code-format = false
 # This only has an effect when the `docstring-code-format` setting is
 # enabled.
 docstring-code-line-length = "dynamic"
+
+
+[tool.pyright]
+"venv" = ".venv"
+"venvPath" = "."

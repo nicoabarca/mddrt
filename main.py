@@ -1,9 +1,9 @@
 import os
-import pandas as pd
-import mddrt
-
 from itertools import product
-from mddrt.utils.misc import bfs
+
+import pandas as pd
+
+import mddrt
 
 blasting_log_path = os.path.join("data", "blasting_with_rework_event_log.csv")
 blasting_event_log = pd.read_csv(blasting_log_path, sep=";")
@@ -82,6 +82,7 @@ for index, (visualize_cost, visualize_time, visualize_flexibility, visualize_qua
             visualize_quality=visualize_quality,
             file_path=os.path.join("data", "diagrams_normal", file_name),
         )
+        print(f"Diagramming normal: {index}")
 
 for index, (visualize_cost, visualize_time, visualize_flexibility, visualize_quality) in enumerate(
     product(options, repeat=4)
@@ -104,3 +105,4 @@ for index, (visualize_cost, visualize_time, visualize_flexibility, visualize_qua
             visualize_quality=visualize_quality,
             file_path=os.path.join("data", "diagrams_grouped", file_name),
         )
+        print(f"Diagramming grouped: {index}")

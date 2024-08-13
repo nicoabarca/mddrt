@@ -1,18 +1,21 @@
-import pandas as pd
-from typing import Tuple
 from datetime import timedelta
+from typing import Hashable, List, Tuple
+
+import pandas as pd
+from pandas.core.groupby import DataFrameGroupBy
+
 from mddrt.drt_parameters import DirectlyRootedTreeParameters
-from mddrt.utils.builder import calculate_cases_metrics, dimensions_to_calculate
 from mddrt.node.node import Node
+from mddrt.utils.builder import calculate_cases_metrics, dimensions_to_calculate
 
 
 class DirectlyRootedTreeBuilder:
     def __init__(self, log: pd.DataFrame, params: DirectlyRootedTreeParameters) -> None:
         self.log: pd.DataFrame = log
         self.params: DirectlyRootedTreeParameters = params
-        self.tree: Node = None
-        self.cases: dict = None
-        self.dimensions_to_calculate: dict = dimensions_to_calculate(params)
+        self.tree: Node = Node(name="root", depth=-1)
+        self.cases: dict = {}
+        self.dimensions_to_calculate: List[str] = dimensions_to_calculate(params)
         self.build()
 
     def build(self) -> None:
@@ -21,7 +24,7 @@ class DirectlyRootedTreeBuilder:
         self.build_tree()
         self.update_root()
 
-    def build_cases(self, cases_grouped_by_id: pd.Grouper) -> None:
+    def build_cases(self, cases_grouped_by_id: DataFrameGroupBy) -> None:
         cases = {}
         cases_metrics = calculate_cases_metrics(self.log, self.params)
         for case in cases_grouped_by_id:
@@ -35,7 +38,7 @@ class DirectlyRootedTreeBuilder:
                 cases[case_id][dimension] = case_metrics[metrics_mapping[dimension]]
         self.cases = cases
 
-    def build_case_activities(self, case: Tuple[int, pd.DataFrame]) -> list:
+    def build_case_activities(self, case: Tuple[Hashable, pd.DataFrame]) -> list:
         case_activities = []
         case_df = case[1]
         for i in range(len(case_df)):
@@ -45,15 +48,16 @@ class DirectlyRootedTreeBuilder:
             if self.params.calculate_cost:
                 activity_dict["cost"] = actual_activity[self.params.cost_key]
             if self.params.calculate_time:
-                next_activity = case_df.iloc[i + 1] if i < len(case[1]) - 1 else case[1].iloc[i]
-                end_timestamp = self.params.start_timestamp_key if i < len(case[1]) - 1 else self.params.timestamp_key
-                activity_dict["time"] = next_activity[end_timestamp] - actual_activity[self.params.start_timestamp_key]
+                service_time = (
+                    actual_activity[self.params.timestamp_key] - actual_activity[self.params.start_timestamp_key]
+                )
+                activity_dict["time"] = service_time
             case_activities.append(activity_dict)
         return case_activities
 
     def build_tree(self) -> None:
-        root = Node(name="root", depth=-1)
-        for _, current_case in self.cases.items():
+        root = self.tree
+        for current_case in self.cases.values():
             parent_node = root
             current_node = None
             for depth, activity in enumerate(current_case["activities"]):
@@ -64,7 +68,6 @@ class DirectlyRootedTreeBuilder:
                     parent_node.add_children(current_node)
 
                 current_node.update_frequency()
-
                 for dimension in self.dimensions_to_calculate:
                     current_node.update_dimensions_data(dimension, depth, current_case)
                 parent_node = current_node
@@ -89,4 +92,6 @@ class DirectlyRootedTreeBuilder:
             self.tree.dimensions_data[dimension]["remainder"] = self.tree.dimensions_data[dimension]["total_case"]
 
     def get_tree(self) -> Node:
+        if not self.tree:
+            raise ValueError("Tree not built yet.")
         return self.tree

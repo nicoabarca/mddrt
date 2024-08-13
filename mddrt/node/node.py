@@ -1,4 +1,5 @@
-from typing import List, Dict, Union, Literal
+from typing import Dict, List, Literal, Union
+
 from mddrt.utils.builder import activities_dimension_cumsum, create_dimensions_data
 from mddrt.utils.misc import pretty_format_dict
 
@@ -52,12 +53,14 @@ class Node:
         dimension_to_update["accumulated"] += dimension_cumsum[depth]
         dimension_to_update["remainder"] = dimension_to_update["total_case"] - dimension_to_update["accumulated"]
 
+        value_to_compare = None
         if dimension in ["cost", "time"]:
-            dimension_to_update["max"] = max(dimension_to_update["max"], activity_dimension_value)
-            dimension_to_update["min"] = min(dimension_to_update["min"], activity_dimension_value)
+            value_to_compare = activity_dimension_value
         else:
-            dimension_to_update["max"] = max(dimension_to_update["max"], current_case[dimension])
-            dimension_to_update["min"] = min(dimension_to_update["min"], current_case[dimension])
+            value_to_compare = current_case[dimension]
+
+        dimension_to_update["max"] = max(dimension_to_update["max"], value_to_compare)
+        dimension_to_update["min"] = min(dimension_to_update["min"], value_to_compare)
 
     def __str__(self) -> str:
         string = f"""

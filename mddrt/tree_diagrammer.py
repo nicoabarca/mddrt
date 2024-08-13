@@ -1,19 +1,21 @@
-import graphviz
-from typing import Callable, Literal
 from collections import deque
+from typing import Callable, Literal
+
+import graphviz
+
 from mddrt.node.node import Node
-from mddrt.utils.diagrammer import (
-    dimensions_min_and_max,
-    dimensions_to_diagram,
-    background_color,
-    format_time,
-    link_width,
-)
 from mddrt.utils.constants import (
-    GRAPHVIZ_STATE_NODE,
-    GRAPHVIZ_STATE_NODE_ROW,
     GRAPHVIZ_ACTIVITY,
     GRAPHVIZ_ACTIVITY_DATA,
+    GRAPHVIZ_STATE_NODE,
+    GRAPHVIZ_STATE_NODE_ROW,
+)
+from mddrt.utils.diagrammer import (
+    background_color,
+    dimensions_min_and_max,
+    dimensions_to_diagram,
+    format_time,
+    link_width,
 )
 
 
@@ -73,7 +75,9 @@ class DirectlyRootedTreeDiagrammer:
         avg_consumed = self.format_value("accumulated", dimension, node)
         avg_remaining = self.format_value("remainder", dimension, node)
         dimension_row = f"{dimension.capitalize()}<br/>"
-        dimension_row += f"Avg. Total Case {dimension.capitalize()}: {avg_total_case}<br/>"
+        dimension_row += (
+            f"Avg. {'Lead' if dimension == 'time' else 'Total Case'} {dimension.capitalize()}: {avg_total_case}<br/>"
+        )
         dimension_row += f"Avg. Consumed {dimension.capitalize()}: {avg_consumed}<br/>"
         dimension_row += f"Avg. Remaining {dimension.capitalize()}: {avg_remaining}<br/>"
         data = node.dimensions_data[dimension]
@@ -92,7 +96,7 @@ class DirectlyRootedTreeDiagrammer:
         avg_total = self.format_value("total", dimension, node)
         maximum = self.format_value("max", dimension, node)
         minimum = self.format_value("min", dimension, node)
-        link_row = f"{dimension.capitalize()}<br/>"
+        link_row = f"{'Service' if dimension == 'time' else ''} {dimension.capitalize()}<br/>"
         link_row += f"Avg: {avg_total}<br/>"
         link_row += f"Max: {maximum}<br/>"
         link_row += f"Min: {minimum}<br/>"

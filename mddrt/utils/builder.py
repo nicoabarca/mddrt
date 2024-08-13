@@ -1,10 +1,11 @@
-import pandas as pd
-import numpy as np
 from datetime import timedelta
-from sys import maxsize
-from mddrt.drt_parameters import DirectlyRootedTreeParameters
-from typing import Literal, List, Union
 from itertools import accumulate
+from sys import maxsize
+from typing import List, Literal, Union
+
+import pandas as pd
+
+from mddrt.drt_parameters import DirectlyRootedTreeParameters
 
 
 def calculate_cases_metrics(
@@ -16,37 +17,23 @@ def calculate_cases_metrics(
 
     if params.calculate_flexibility and num_mandatory_activities is None:
         mandatory_activities = log.loc[log[params.case_id_key] == case_ids[0]][params.activity_key].unique()
-        counter = 0
+        mandatory_activities_set = set(mandatory_activities)
         for case_id in case_ids:
             log_case = log.loc[log[params.case_id_key] == case_id]
             case_activities = log_case[params.activity_key].unique()
-
-            non_mandatory_activities = []
-            for mandatory_activity in mandatory_activities:
-                if not np.isin(mandatory_activity, case_activities):
-                    non_mandatory_activities.append(mandatory_activity)
-
-            for non_mandatory_activity in non_mandatory_activities:
-                mandatory_activities = np.delete(
-                    mandatory_activities, np.where(mandatory_activities == non_mandatory_activity)
-                )
-            counter += 1
-
-        num_mandatory_activities = len(mandatory_activities)
+            mandatory_activities_set = mandatory_activities_set.intersection(case_activities)
+        num_mandatory_activities = len(mandatory_activities_set)
 
     log_metrics = []
 
     for case_id in case_ids:
         log_case = log.loc[log[params.case_id_key] == case_id]
-
-        case_metrics = {}
-
+        case_metrics = dict()
         case_metrics["Case Id"] = case_id
 
         if params.calculate_time:
             case_start = log_case[params.start_timestamp_key].min()
             case_complete = log_case[params.timestamp_key].max()
-
             case_metrics["Duration"] = case_complete - case_start
 
         if params.calculate_cost:
@@ -67,9 +54,7 @@ def calculate_cases_metrics(
             case_metrics["Total Activities"] = len(log_case)
 
         log_metrics.append(case_metrics)
-    log_metrics = pd.DataFrame(log_metrics)
-
-    return log_metrics
+    return pd.DataFrame(log_metrics)
 
 
 def get_start_activities(cases_grouped_by_id: pd.DataFrame, params: DirectlyRootedTreeParameters) -> List[dict]:
@@ -96,12 +81,13 @@ def create_dimensions_data() -> dict:
     case_data["quality"] = data.copy()
     case_data["flexibility"] = data.copy()
     data = {
-        "total": pd.Timedelta(days=0),
-        "total_case": pd.Timedelta(days=0),
+        "service": pd.Timedelta(days=0),
+        "waiting": pd.Timedelta(days=0),
+        "lead": pd.Timedelta(days=0),
         "remainder": pd.Timedelta(days=0),
         "accumulated": pd.Timedelta(days=0),
         "max": pd.Timedelta(days=0),
-        "min": timedelta(microseconds=2**63 - 1),
+        "min": pd.Timedelta.max,
     }
     case_data["time"] = data
     return case_data
