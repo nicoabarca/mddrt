@@ -1,9 +1,14 @@
-from typing import Dict, List, Literal, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Literal
 
 import pandas as pd
 
 from mddrt.utils.builder import activities_dimension_cumsum, create_dimensions_data
 from mddrt.utils.misc import pretty_format_dict
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 class TreeNode:
@@ -14,21 +19,22 @@ class TreeNode:
         self.name: str = name
         self.depth: int = depth
         self.frequency: int = 0
-        self.dimensions_data: Dict[Literal["cost", "time", "flexibility", "quality"], dict] = create_dimensions_data()
+        self.dimensions_data: dict[Literal["cost", "time", "flexibility", "quality"], dict] = create_dimensions_data()
         self.parent: TreeNode = None
-        self.children: List["TreeNode"] = []
+        self.children: list[TreeNode] = []
         TreeNode.id += 1
 
-    def add_children(self, node: "TreeNode") -> None:
+    def add_children(self, node: TreeNode) -> None:
         self.children.append(node)
 
-    def set_parent(self, parent_node: "TreeNode") -> None:
+    def set_parent(self, parent_node: TreeNode) -> None:
         self.parent = parent_node
 
-    def get_child_by_name_and_depth(self, name: str, depth: int) -> Union["TreeNode", None]:
+    def get_child_by_name_and_depth(self, name: str, depth: int) -> TreeNode | None:
         for child in self.children:
             if child.name == name and child.depth == depth:
                 return child
+        return None
 
     def update_name(self, name: str) -> None:
         self.name = name
@@ -79,19 +85,23 @@ class TreeNode:
         self.update_min_max(dimension_data, total_value)
 
     def update_cumulative_data(
-        self, dimension_data: dict, activity_value: float, dimension_cumsum: float, total_value: float
+        self,
+        dimension_data: dict,
+        activity_value: float,
+        dimension_cumsum: float,
+        total_value: float,
     ) -> None:
         dimension_data["total"] += activity_value
         dimension_data["total_case"] += total_value
         dimension_data["accumulated"] += dimension_cumsum
         dimension_data["remainder"] = dimension_data["total_case"] - dimension_data["accumulated"]
 
-    def update_min_max(self, dimension_data: dict, value_to_compare: Union[float, pd.Timedelta]) -> None:
+    def update_min_max(self, dimension_data: dict, value_to_compare: float | pd.Timedelta) -> None:
         dimension_data["max"] = max(dimension_data["max"], value_to_compare)
         dimension_data["min"] = min(dimension_data["min"], value_to_compare)
 
     def __str__(self) -> str:
-        string = f"""
+        return f"""
 Id: {self.id}
 Name: {self.name}
 Depth: {self.depth}
@@ -99,4 +109,3 @@ Freq: {self.frequency}
 Parent: {self.parent.name if self.parent else None} {self.parent.id if self.parent else None}
 Data: \n{pretty_format_dict(self.dimensions_data)}
 """
-        return string

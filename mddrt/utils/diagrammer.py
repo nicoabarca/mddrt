@@ -1,8 +1,9 @@
+from __future__ import annotations
+
 from collections import deque
 from datetime import timedelta
-from typing import Dict, List, Literal, Tuple, Union
+from typing import TYPE_CHECKING, Literal
 
-from mddrt.tree_node import TreeNode
 from mddrt.utils.color_schemes import (
     COST_COLOR_SCHEME,
     FLEXIBILITY_COLOR_SCHEME,
@@ -11,8 +12,11 @@ from mddrt.utils.color_schemes import (
     TIME_COLOR_SCHEME,
 )
 
+if TYPE_CHECKING:
+    from mddrt.tree_node import TreeNode
 
-def dimensions_min_and_max(tree_root: TreeNode) -> Dict[str, List[int]]:
+
+def dimensions_min_and_max(tree_root: TreeNode) -> dict[str, list[int]]:
     dimensions_min_and_max = {"frequency": [0, 0]}
     for dimension in tree_root.dimensions_data:
         dimensions_min_and_max[dimension] = [0, 0]
@@ -29,7 +33,7 @@ def dimensions_min_and_max(tree_root: TreeNode) -> Dict[str, List[int]]:
             dimension_avg_total_case = (
                 data["total_case"] / current_node.frequency
                 if dimension != "time"
-                else (data["total_case"] / current_node.frequency).total_seconds()
+                else (data["lead_case"] / current_node.frequency).total_seconds()
             )
             dimensions_min_and_max[dimension][0] = min(dimensions_min_and_max[dimension][0], dimension_avg_total_case)
             dimensions_min_and_max[dimension][1] = max(dimensions_min_and_max[dimension][0], dimension_avg_total_case)
@@ -41,9 +45,9 @@ def dimensions_min_and_max(tree_root: TreeNode) -> Dict[str, List[int]]:
 
 
 def background_color(
-    measure: Union[timedelta, int],
+    measure: timedelta | int,
     dimension: Literal["frequency", "cost", "time", "flexibility", "quality"],
-    dimension_scale: Tuple[int, int],
+    dimension_scale: tuple[int, int],
 ) -> str:
     if isinstance(measure, timedelta):
         measure = measure.total_seconds()
@@ -53,7 +57,7 @@ def background_color(
     return color_scheme[assigned_color_index]
 
 
-def interpolated_value(measure: int, from_scale: Tuple[int, int], to_scale: Tuple[int, int]) -> int:
+def interpolated_value(measure: int, from_scale: tuple[int, int], to_scale: tuple[int, int]) -> int:
     measure = max(min(measure, from_scale[1]), from_scale[0])
     denominator = max(1, (from_scale[1] - from_scale[0]))
     normalized_value = (measure - from_scale[0]) / denominator
@@ -61,7 +65,7 @@ def interpolated_value(measure: int, from_scale: Tuple[int, int], to_scale: Tupl
     return round(interpolated_value)
 
 
-def color_scheme_by_dimension(dimension: Literal["frequency", "cost", "time", "flexibility", "quality"]) -> List[str]:
+def color_scheme_by_dimension(dimension: Literal["frequency", "cost", "time", "flexibility", "quality"]) -> list[str]:
     dimension_color_schemes = {
         "frequency": FREQUENCY_COLOR_SCHEME,
         "cost": COST_COLOR_SCHEME,
@@ -81,20 +85,19 @@ def format_time(time: timedelta) -> str:
     seconds = round(time.seconds % 60)
 
     if years > 0:
-        return "{:02d}y {:02d}m {:02d}d ".format(years, months, days)
+        return f"{years:02d}y {months:02d}m {days:02d}d "
     if months > 0:
-        return "{:02d}m {:02d}d {:02d}h ".format(months, days, hours)
+        return f"{months:02d}m {days:02d}d {hours:02d}h "
     if days > 0:
-        return "{:02d}d {:02d}h {:02d}m ".format(days, hours, minutes)
+        return f"{days:02d}d {hours:02d}h {minutes:02d}m "
     if hours > 0:
-        return "{:02d}h {:02d}m {:02d}s ".format(hours, minutes, seconds)
+        return f"{hours:02d}h {minutes:02d}m {seconds:02d}s "
     if minutes > 0:
-        return "{:02d}m {:02d}s".format(minutes, seconds)
-    if seconds >= 0:
-        return "{:02d}s".format(seconds)
+        return f"{minutes:02d}m {seconds:02d}s"
+    return f"{seconds:02d}s"
 
 
-def dimensions_to_diagram(time: bool, cost: bool, quality: bool, flexibility: bool) -> List[str]:
+def dimensions_to_diagram(time: bool, cost: bool, quality: bool, flexibility: bool) -> list[str]:
     dimensions_to_diagram = []
     if time:
         dimensions_to_diagram.append("time")
@@ -107,7 +110,6 @@ def dimensions_to_diagram(time: bool, cost: bool, quality: bool, flexibility: bo
     return dimensions_to_diagram
 
 
-def link_width(measure: int, dimension_scale: List[int]):
+def link_width(measure: int, dimension_scale: list[int]) -> int:
     width_scale = (1, 8)
-    link_width = round(interpolated_value(measure, dimension_scale, width_scale), 2)
-    return link_width
+    return round(interpolated_value(measure, dimension_scale, width_scale), 2)

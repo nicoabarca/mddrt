@@ -1,4 +1,5 @@
 from collections import deque
+from pathlib import Path
 
 
 def pretty_format_dict(d: dict, indent: int = 0) -> str:
@@ -20,7 +21,7 @@ def pretty_format_dict(d: dict, indent: int = 0) -> str:
     return pretty_str
 
 
-def bfs(root, write_to_file=False):
+def bfs(root, write_to_file: bool = False) -> None:
     queue = deque([root])
 
     while queue:

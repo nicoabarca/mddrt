@@ -1,12 +1,13 @@
 import os
 from itertools import product
+from pathlib import Path
 
 import pandas as pd
 
 import mddrt
 from mddrt.utils.misc import bfs
 
-blasting_log_path = os.path.join("data", "blasting_with_rework_event_log.csv")
+blasting_log_path = Path("data") / "blasting_with_rework_event_log.csv"
 blasting_event_log = pd.read_csv(blasting_log_path, sep=";")
 blasting_format = {
     "case:concept:name": "Case ID",
@@ -18,7 +19,7 @@ blasting_format = {
 }
 blasting_event_log = mddrt.log_formatter(blasting_event_log, blasting_format)
 
-cars_reparation_log_path = os.path.join("data", "reparacion_vehiculos_con_atributos.csv")
+cars_reparation_log_path = Path("data") / "reparacion_vehiculos_con_atributos.csv"
 cars_reparation_event_log = pd.read_csv(cars_reparation_log_path, sep=";")
 cars_reparation_format = {
     "case:concept:name": "ID Caso",
@@ -30,7 +31,7 @@ cars_reparation_format = {
 }
 cars_reparation_event_log = mddrt.log_formatter(cars_reparation_event_log, cars_reparation_format)
 
-traffic_log_path = os.path.join("data", "Road_Traffic_Fine_Management_Process.csv")
+traffic_log_path = Path("data") / "Road_Traffic_Fine_Management_Process.csv"
 traffic_event_log = pd.read_csv(traffic_log_path, sep=",")
 traffic_format = {
     "case:concept:name": "Case ID",
@@ -50,8 +51,6 @@ drt_normal = mddrt.discover_multi_dimension_drt(
     calculate_quality=True,
     group_activities=False,
 )
-bfs(drt_normal, True)
-breakpoint()
 
 drt_grouped = mddrt.discover_multi_dimension_drt(
     blasting_event_log,
@@ -62,11 +61,10 @@ drt_grouped = mddrt.discover_multi_dimension_drt(
     group_activities=True,
 )
 
-
 options = [True, False]
 
 for index, (visualize_cost, visualize_time, visualize_flexibility, visualize_quality) in enumerate(
-    product(options, repeat=4)
+    product(options, repeat=4),
 ):
     suffixes = [
         "_cost_" if visualize_cost else "",
@@ -88,7 +86,7 @@ for index, (visualize_cost, visualize_time, visualize_flexibility, visualize_qua
         print(f"Diagramming normal: {index}")
 
 for index, (visualize_cost, visualize_time, visualize_flexibility, visualize_quality) in enumerate(
-    product(options, repeat=4)
+    product(options, repeat=4),
 ):
     suffixes = [
         "_cost_" if visualize_cost else "",

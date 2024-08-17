@@ -12,13 +12,7 @@ class DirectlyRootedTreeParameters:
     calculate_cost: bool = True
     calculate_quality: bool = True
     calculate_flexibility: bool = True
-    # ['total', 'consumed', 'remaining']
     node_time_measures: list = field(default_factory=lambda: ["total"])
-    # ['total', 'consumed', 'remaining']
     node_cost_measures: list = field(default_factory=lambda: ["total"])
-    # rework y flexibility solo pueden ser medidas a nivel de todo el caso
-    # ['mean', 'median', 'sum', 'max', 'min', 'stdev']
     arc_time_measures: list = field(default_factory=lambda: ["mean"])
-    # ['mean', 'median', 'sum', 'max', 'min', 'stdev']
     arc_cost_measures: list = field(default_factory=lambda: ["mean"])
-    # rework y flexibility solo pueden ser medidas a nivel de todo el caso
