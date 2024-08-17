@@ -5,7 +5,7 @@ import pandas as pd
 from pandas.core.groupby import DataFrameGroupBy
 
 from mddrt.drt_parameters import DirectlyRootedTreeParameters
-from mddrt.node.node import Node
+from mddrt.tree_node import TreeNode
 from mddrt.utils.builder import calculate_cases_metrics, dimensions_to_calculate
 
 
@@ -13,7 +13,7 @@ class DirectlyRootedTreeBuilder:
     def __init__(self, log: pd.DataFrame, params: DirectlyRootedTreeParameters) -> None:
         self.log: pd.DataFrame = log
         self.params: DirectlyRootedTreeParameters = params
-        self.tree: Node = Node(name="root", depth=-1)
+        self.tree: TreeNode = TreeNode(name="root", depth=-1)
         self.cases: dict = {}
         self.dimensions_to_calculate: List[str] = dimensions_to_calculate(params)
         self.build()
@@ -22,7 +22,8 @@ class DirectlyRootedTreeBuilder:
         cases_grouped_by_id = self.log.groupby(self.params.case_id_key, dropna=True, sort=False)
         self.build_cases(cases_grouped_by_id)
         self.build_tree()
-        self.update_root()
+        # TODO: fix update root methos based on new time information
+        # self.update_root()
 
     def build_cases(self, cases_grouped_by_id: DataFrameGroupBy) -> None:
         cases = {}
@@ -51,7 +52,15 @@ class DirectlyRootedTreeBuilder:
                 service_time = (
                     actual_activity[self.params.timestamp_key] - actual_activity[self.params.start_timestamp_key]
                 )
-                activity_dict["time"] = service_time
+                activity_dict["service_time"] = service_time
+
+                prev_activity = case_df.iloc[i] if i == 0 else case_df.iloc[i - 1]
+                waiting_time = (
+                    actual_activity[self.params.start_timestamp_key] - prev_activity[self.params.timestamp_key]
+                    if i > 0
+                    else pd.Timedelta(0)
+                )
+                activity_dict["waiting_time"] = waiting_time
             case_activities.append(activity_dict)
         return case_activities
 
@@ -63,13 +72,13 @@ class DirectlyRootedTreeBuilder:
             for depth, activity in enumerate(current_case["activities"]):
                 current_node = parent_node.get_child_by_name_and_depth(activity["name"], depth)
                 if not current_node:
-                    current_node = Node(activity["name"], depth)
+                    current_node = TreeNode(activity["name"], depth)
                     current_node.set_parent(parent_node)
                     parent_node.add_children(current_node)
 
                 current_node.update_frequency()
                 for dimension in self.dimensions_to_calculate:
-                    current_node.update_dimensions_data(dimension, depth, current_case)
+                    current_node.update_dimension(dimension, depth, current_case)
                 parent_node = current_node
         self.tree = root
 
@@ -91,7 +100,7 @@ class DirectlyRootedTreeBuilder:
             )
             self.tree.dimensions_data[dimension]["remainder"] = self.tree.dimensions_data[dimension]["total_case"]
 
-    def get_tree(self) -> Node:
+    def get_tree(self) -> TreeNode:
         if not self.tree:
             raise ValueError("Tree not built yet.")
         return self.tree

@@ -1,17 +1,18 @@
-from typing import Tuple, Literal, List, Dict, Union
-from datetime import timedelta
-from mddrt.node.node import Node
-from mddrt.utils.color_schemes import (
-    FREQUENCY_COLOR_SCHEME,
-    TIME_COLOR_SCHEME,
-    COST_COLOR_SCHEME,
-    QUALITY_COLOR_SCHEME,
-    FLEXIBILITY_COLOR_SCHEME,
-)
 from collections import deque
+from datetime import timedelta
+from typing import Dict, List, Literal, Tuple, Union
+
+from mddrt.tree_node import TreeNode
+from mddrt.utils.color_schemes import (
+    COST_COLOR_SCHEME,
+    FLEXIBILITY_COLOR_SCHEME,
+    FREQUENCY_COLOR_SCHEME,
+    QUALITY_COLOR_SCHEME,
+    TIME_COLOR_SCHEME,
+)
 
 
-def dimensions_min_and_max(tree_root: Node) -> Dict[str, List[int]]:
+def dimensions_min_and_max(tree_root: TreeNode) -> Dict[str, List[int]]:
     dimensions_min_and_max = {"frequency": [0, 0]}
     for dimension in tree_root.dimensions_data:
         dimensions_min_and_max[dimension] = [0, 0]

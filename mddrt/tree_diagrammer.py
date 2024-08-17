@@ -3,7 +3,7 @@ from typing import Callable, Literal
 
 import graphviz
 
-from mddrt.node.node import Node
+from mddrt.tree_node import TreeNode
 from mddrt.utils.constants import (
     GRAPHVIZ_ACTIVITY,
     GRAPHVIZ_ACTIVITY_DATA,
@@ -22,7 +22,7 @@ from mddrt.utils.diagrammer import (
 class DirectlyRootedTreeDiagrammer:
     def __init__(
         self,
-        tree_root: Node,
+        tree_root: TreeNode,
         visualize_time: bool = True,
         visualize_cost: bool = True,
         visualize_quality: bool = True,
@@ -43,7 +43,7 @@ class DirectlyRootedTreeDiagrammer:
         self.traverse_to_diagram(self.build_node)
         self.traverse_to_diagram(self.build_links)
 
-    def traverse_to_diagram(self, routine: Callable[[Node], None]) -> None:
+    def traverse_to_diagram(self, routine: Callable[[TreeNode], None]) -> None:
         queue = deque([self.tree_root])
 
         while queue:
@@ -52,11 +52,11 @@ class DirectlyRootedTreeDiagrammer:
             for child in current_node.children:
                 queue.append(child)
 
-    def build_node(self, node: Node) -> None:
+    def build_node(self, node: TreeNode) -> None:
         state_label = self.build_state_label(node)
         self.diagram.node(str(node.id), label=f"<{state_label}>", shape="none")
 
-    def build_links(self, node: Node) -> None:
+    def build_links(self, node: TreeNode) -> None:
         for child in node.children:
             link_label = self.build_link_label(child)
             penwidth = link_width(child.frequency, self.dimensions_min_and_max["frequency"])
@@ -64,13 +64,15 @@ class DirectlyRootedTreeDiagrammer:
                 tail_name=str(node.id), head_name=str(child.id), label=f"<{link_label}>", penwidth=str(penwidth)
             )
 
-    def build_state_label(self, node: Node) -> str:
+    def build_state_label(self, node: TreeNode) -> str:
         content = ""
         for dimension in self.dimensions_to_diagram:
             content += self.build_state_row_string(dimension, node)
         return GRAPHVIZ_STATE_NODE.format(content)
 
-    def build_state_row_string(self, dimension: Literal["cost", "time", "flexibility", "quality"], node: Node) -> str:
+    def build_state_row_string(
+        self, dimension: Literal["cost", "time", "flexibility", "quality"], node: TreeNode
+    ) -> str:
         avg_total_case = self.format_value("total_case", dimension, node)
         avg_consumed = self.format_value("accumulated", dimension, node)
         avg_remaining = self.format_value("remainder", dimension, node)
@@ -86,13 +88,13 @@ class DirectlyRootedTreeDiagrammer:
         )
         return GRAPHVIZ_STATE_NODE_ROW.format(bg_color, dimension_row)
 
-    def build_link_label(self, node: Node) -> str:
+    def build_link_label(self, node: TreeNode) -> str:
         content = GRAPHVIZ_ACTIVITY_DATA.format(f"{node.name} ({node.frequency})")
         for dimension in self.dimensions_to_diagram:
             content += self.build_link_string(dimension, node)
         return GRAPHVIZ_ACTIVITY.format(content)
 
-    def build_link_string(self, dimension: Literal["cost", "time", "flexibility", "quality"], node: Node) -> str:
+    def build_link_string(self, dimension: Literal["cost", "time", "flexibility", "quality"], node: TreeNode) -> str:
         avg_total = self.format_value("total", dimension, node)
         maximum = self.format_value("max", dimension, node)
         minimum = self.format_value("min", dimension, node)
@@ -106,7 +108,7 @@ class DirectlyRootedTreeDiagrammer:
         self,
         metric: Literal["total", "total_case", "accumulated", "remainder", "max", "min"],
         dimension: Literal["cost", "time", "flexibility", "quality"],
-        node: Node,
+        node: TreeNode,
     ) -> str:
         value = None
 

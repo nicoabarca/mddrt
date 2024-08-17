@@ -6,10 +6,10 @@ import matplotlib.pyplot as plt
 from graphviz import Source
 
 from mddrt.drt_parameters import DirectlyRootedTreeParameters
-from mddrt.node.node import Node
 from mddrt.tree_builder import DirectlyRootedTreeBuilder
 from mddrt.tree_diagrammer import DirectlyRootedTreeDiagrammer
 from mddrt.tree_grouper import DirectedRootedTreeGrouper
+from mddrt.tree_node import TreeNode
 from mddrt.utils.actions import save_graphviz_diagram
 
 
@@ -52,7 +52,7 @@ def discover_multi_dimension_drt(
     return multi_dimension_drt
 
 
-def group_drt_activities(multi_dimension_drt: Node):
+def group_drt_activities(multi_dimension_drt: TreeNode):
     grouper = DirectedRootedTreeGrouper(multi_dimension_drt)
     return grouper.get_tree()
 
@@ -71,7 +71,7 @@ def group_log_activities(
 
 
 def get_multi_dimension_drt_string(
-    multi_dimension_drt: Node,
+    multi_dimension_drt: TreeNode,
     visualize_time: bool = True,
     visualize_cost: bool = True,
     visualize_quality: bool = True,
@@ -90,7 +90,7 @@ def get_multi_dimension_drt_string(
 
 
 def view_multi_dimension_drt(
-    multi_dimension_drt: Node,
+    multi_dimension_drt: TreeNode,
     visualize_time=True,
     visualize_cost=True,
     visualize_quality=True,

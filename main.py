@@ -4,6 +4,7 @@ from itertools import product
 import pandas as pd
 
 import mddrt
+from mddrt.utils.misc import bfs
 
 blasting_log_path = os.path.join("data", "blasting_with_rework_event_log.csv")
 blasting_event_log = pd.read_csv(blasting_log_path, sep=";")
@@ -49,6 +50,8 @@ drt_normal = mddrt.discover_multi_dimension_drt(
     calculate_quality=True,
     group_activities=False,
 )
+bfs(drt_normal, True)
+breakpoint()
 
 drt_grouped = mddrt.discover_multi_dimension_drt(
     blasting_event_log,

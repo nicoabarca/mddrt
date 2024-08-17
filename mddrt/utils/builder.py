@@ -1,4 +1,3 @@
-from datetime import timedelta
 from itertools import accumulate
 from sys import maxsize
 from typing import List, Literal, Union
@@ -57,48 +56,46 @@ def calculate_cases_metrics(
     return pd.DataFrame(log_metrics)
 
 
-def get_start_activities(cases_grouped_by_id: pd.DataFrame, params: DirectlyRootedTreeParameters) -> List[dict]:
-    start_activities = [*dict(cases_grouped_by_id[params.activity_key].first().value_counts()).keys()]
-    return start_activities
-
-
-def get_end_activities(cases_grouped_by_id: pd.DataFrame, params: DirectlyRootedTreeParameters) -> List[dict]:
-    end_activities = [*dict(cases_grouped_by_id[params.activity_key].last().value_counts()).keys()]
-    return end_activities
-
-
 def create_dimensions_data() -> dict:
-    case_data = {}
-    data = {
-        "total": 0,
-        "total_case": 0,
-        "remainder": 0,
-        "accumulated": 0,
-        "max": 0,
-        "min": maxsize,
+    case_data = {
+        "cost": create_default_data("numeric"),
+        "quality": create_default_data("numeric"),
+        "flexibility": create_default_data("numeric"),
+        "time": create_default_data("timedelta"),
     }
-    case_data["cost"] = data.copy()
-    case_data["quality"] = data.copy()
-    case_data["flexibility"] = data.copy()
-    data = {
-        "service": pd.Timedelta(days=0),
-        "waiting": pd.Timedelta(days=0),
-        "lead": pd.Timedelta(days=0),
-        "remainder": pd.Timedelta(days=0),
-        "accumulated": pd.Timedelta(days=0),
-        "max": pd.Timedelta(days=0),
-        "min": pd.Timedelta.max,
-    }
-    case_data["time"] = data
     return case_data
+
+
+def create_default_data(data_type=Literal["numeric", "timedelta"]):
+    if data_type == "numeric":
+        return {
+            "total": 0,
+            "total_case": 0,
+            "remainder": 0,
+            "accumulated": 0,
+            "max": 0,
+            "min": maxsize,
+        }
+    elif data_type == "timedelta":
+        return {
+            "lead": pd.Timedelta(days=0),
+            "lead_case": pd.Timedelta(days=0),
+            "lead_remainder": pd.Timedelta(days=0),
+            "lead_accumulated": pd.Timedelta(days=0),
+            "max": pd.Timedelta(days=0),
+            "min": pd.Timedelta.max,
+            "service": pd.Timedelta(days=0),
+            "waiting": pd.Timedelta(days=0),
+        }
 
 
 def activities_dimension_cumsum(
     current_case: dict, dimension: Literal["cost", "time", "flexibility", "quality"]
 ) -> List[Union[int, pd.Timedelta]]:
     activities = current_case["activities"]
-    dimension_data = None
-    if dimension in ["cost", "time"]:
+    if dimension == "time":
+        dimension_data = [item["service_time"] + item["waiting_time"] for item in activities]
+    elif dimension == "cost":
         dimension_data = [item[dimension] for item in activities]
     else:
         dimension_data = [current_case[dimension] / len(current_case["activities"])] * len(current_case["activities"])
