@@ -1,7 +1,7 @@
 [project]
 name = "mddrt"
 version = "0.0.1"
-dependencies = ["pandas", "numpy", "matplotlib", "pyarrow", "graphviz"]
+dependencies = ["pandas", "numpy", "matplotlib", "pyarrow", "graphviz", "tqdm"]
 
 description = "Package for Multi-Dimension Directly Rooted Trees visualization"
 readme = "README.md"
@@ -16,8 +16,8 @@ classifiers = [
 license = { file = "LICENSE" }
 
 [project.urls]
-Homepage = "https://github.com/nicoabarca/mpdrt"
-Issues = "https://github.com/nicoabarca/mpdrt/issues"
+Homepage = "https://github.com/nicoabarca/mddrt"
+Issues = "https://github.com/nicoabarca/mddrt/issues"
 
 [build-system]
 requires = ["hatchling"]

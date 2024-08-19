@@ -5,6 +5,7 @@ from sys import maxsize
 from typing import TYPE_CHECKING, Literal
 
 import pandas as pd
+from tqdm import tqdm
 
 if TYPE_CHECKING:
     from mddrt.drt_parameters import DirectlyRootedTreeParameters
@@ -20,15 +21,16 @@ def calculate_cases_metrics(
     if params.calculate_flexibility and num_mandatory_activities is None:
         mandatory_activities = log.loc[log[params.case_id_key] == case_ids[0]][params.activity_key].unique()
         mandatory_activities_set = set(mandatory_activities)
-        for case_id in case_ids:
+        print("Calculating log mandatory activities: ")
+        for case_id in tqdm(case_ids):
             log_case = log.loc[log[params.case_id_key] == case_id]
             case_activities = log_case[params.activity_key].unique()
             mandatory_activities_set = mandatory_activities_set.intersection(case_activities)
         num_mandatory_activities = len(mandatory_activities_set)
 
     log_metrics = []
-
-    for case_id in case_ids:
+    print("Calculating log metrics: ")
+    for case_id in tqdm(case_ids):
         log_case = log.loc[log[params.case_id_key] == case_id]
         case_metrics = {}
         case_metrics["Case Id"] = case_id

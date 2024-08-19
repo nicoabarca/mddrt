@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 
 @dataclass
@@ -12,7 +12,3 @@ class DirectlyRootedTreeParameters:
     calculate_cost: bool = True
     calculate_quality: bool = True
     calculate_flexibility: bool = True
-    node_time_measures: list = field(default_factory=lambda: ["total"])
-    node_cost_measures: list = field(default_factory=lambda: ["total"])
-    arc_time_measures: list = field(default_factory=lambda: ["mean"])
-    arc_cost_measures: list = field(default_factory=lambda: ["mean"])

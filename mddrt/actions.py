@@ -19,17 +19,50 @@ def discover_multi_dimension_drt(
     calculate_cost=True,
     calculate_quality=True,
     calculate_flexibility=True,
-    node_time_measures=["total"],  # ['total', 'consumed', 'remaining']
-    node_cost_measures=["total"],  # ['total', 'consumed', 'remaining']
-    arc_time_measures=["mean"],  # ['mean', 'median', 'sum', 'max', 'min', 'stdev']
-    arc_cost_measures=["mean"],  # ['mean', 'median', 'sum', 'max', 'min', 'stdev']
-    group_activities=False,  # si True, ejecutar función para agrupar secuencias de actividades sin caminos alternativos
+    group_activities=False,
     case_id_key="case:concept:name",
     activity_key="concept:name",
     timestamp_key="time:timestamp",
     start_timestamp_key="start_timestamp",
     cost_key="cost:total",
-):
+) -> TreeNode:
+    """
+    Discovers and constructs a multi-dimensional Directly Rooted Tree (DRT) from the provided event log.
+
+    This function analyzes an event log and creates a multi-dimensional Directly Rooted Tree (DRT)
+    representing the process model. The DRT is built based on various dimensions such as time, cost,
+    quality, and flexibility, according to the specified parameters.
+
+    Args:
+        log: The event log data to analyze, typically a DataFrame or similar structure.
+        calculate_time (bool, optional): Whether to calculate and include the time dimension in the DRT.
+                                         Defaults to True.
+        calculate_cost (bool, optional): Whether to calculate and include the cost dimension in the DRT.
+                                         Defaults to True.
+        calculate_quality (bool, optional): Whether to calculate and include the quality dimension in the DRT.
+                                            Defaults to True.
+        calculate_flexibility (bool, optional): Whether to calculate and include the flexibility dimension in the DRT.
+                                                Defaults to True.
+        group_activities (bool, optional): Whether to group activities that follows a single child path within the DRT. Defaults to False.
+        case_id_key (str, optional): The key for case IDs in the event log. Defaults to "case:concept:name".
+        activity_key (str, optional): The key for activity names in the event log. Defaults to "concept:name".
+        timestamp_key (str, optional): The key for timestamps in the event log. Defaults to "time:timestamp".
+        start_timestamp_key (str, optional): The key for start timestamps in the event log. Defaults to "start_timestamp".
+        cost_key (str, optional): The key for cost information in the event log. Defaults to "cost:total".
+
+    Returns:
+        TreeNode: The root node of the constructed multi-dimensional Directly Rooted Tree (DRT).
+
+    Example:
+        >>> drt = discover_multi_dimension_drt(log, calculate_time=True, calculate_cost=False)
+        >>> print(drt)
+
+    Notes:
+        - The function uses the `DirectlyRootedTreeParameters` class to encapsulate the parameters and
+          the `DirectlyRootedTreeBuilder` class to build the tree.
+        - If `group_activities` is set to True, the function will group similar activities within the tree
+          using the `group_drt_activities` function.
+    """
     parameters = DirectlyRootedTreeParameters(
         case_id_key,
         activity_key,
@@ -40,10 +73,6 @@ def discover_multi_dimension_drt(
         calculate_cost,
         calculate_quality,
         calculate_flexibility,
-        node_time_measures,
-        node_cost_measures,
-        arc_time_measures,
-        arc_cost_measures,
     )
     multi_dimension_drt = DirectlyRootedTreeBuilder(log, parameters).get_tree()
     if group_activities:
@@ -52,22 +81,18 @@ def discover_multi_dimension_drt(
     return multi_dimension_drt
 
 
-def group_drt_activities(multi_dimension_drt: TreeNode):
+def group_drt_activities(multi_dimension_drt: TreeNode) -> TreeNode:
+    """
+    Groups activities in a multi-dimensional directly rooted tree (DRT).
+
+    Args:
+        multi_dimension_drt (TreeNode): The root of the multi-dimensional DRT.
+
+    Returns:
+        TreeNode: The root of the grouped multi-dimensional DRT.
+    """
     grouper = DirectedRootedTreeGrouper(multi_dimension_drt)
     return grouper.get_tree()
-
-
-def group_log_activities(
-    log,
-    activities,  # lista con actividades a agrupar
-    group_name="",
-):  # nombre de la nueva 'actividad' que agrupa a las otras, si está en blanco, usar como nombre la lista de actividades
-    # Agrupación manual de actividades del log, previo a la ejecución de discover_multi_dimension_drt
-
-    # Cada actividad puede ocurrir N veces en cada ejecución del proceso. Se tendrían que crear de i=0 a N grupos, donde i es la ocurrencia i de cada actividad
-    # En otras palabras, si queremos agrupar A y B en la traza ABCDBCAB, tendríamos como resultado algo como [AB]CD[AB]CB (la tercera B no se agrupa, pues no hay una tercera A)
-
-    return log
 
 
 def get_multi_dimension_drt_string(
@@ -76,7 +101,20 @@ def get_multi_dimension_drt_string(
     visualize_cost: bool = True,
     visualize_quality: bool = True,
     visualize_flexibility: bool = True,
-):
+) -> str:
+    """
+    Generates a string representation of a multi-dimensional directly rooted tree (DRT) diagram.
+
+    Args:
+        multi_dimension_drt (TreeNode): The root of the multi-dimensional DRT.
+        visualize_time (bool, optional): Whether to include the time dimension in the visualization. Defaults to True.
+        visualize_cost (bool, optional): Whether to include the cost dimension in the visualization. Defaults to True.
+        visualize_quality (bool, optional): Whether to include the quality dimension in the visualization. Defaults to True.
+        visualize_flexibility (bool, optional): Whether to include the flexibility dimension in the visualization. Defaults to True.
+
+    Returns:
+        str: A string representation of the multi-dimensional DRT diagram.
+    """
     diagrammer = DirectlyRootedTreeDiagrammer(
         multi_dimension_drt,
         visualize_time=visualize_time,
@@ -84,9 +122,7 @@ def get_multi_dimension_drt_string(
         visualize_quality=visualize_quality,
         visualize_flexibility=visualize_flexibility,
     )
-    drt_string = diagrammer.get_diagram_string()
-
-    return drt_string
+    return diagrammer.get_diagram_string()
 
 
 def view_multi_dimension_drt(
@@ -96,7 +132,24 @@ def view_multi_dimension_drt(
     visualize_quality=True,
     visualize_flexibility=True,
     format="png",
-):
+) -> None:
+    """
+    Visualizes a multi-dimensional directly rooted tree (DRT) using a graphical format.
+
+    Args:
+        multi_dimension_drt (TreeNode): The root of the multi-dimensional DRT.
+        visualize_time (bool, optional): Whether to include the time dimension in the visualization. Defaults to True.
+        visualize_cost (bool, optional): Whether to include the cost dimension in the visualization. Defaults to True.
+        visualize_quality (bool, optional): Whether to include the quality dimension in the visualization. Defaults to True.
+        visualize_flexibility (bool, optional): Whether to include the flexibility dimension in the visualization. Defaults to True.
+        format (str, optional): The file format of the visualization output (e.g., "png"). Defaults to "png".
+
+    Raises:
+        IOError: If the temporary file cannot be created or read.
+
+    Returns:
+        None
+    """
     drt_string = get_multi_dimension_drt_string(
         multi_dimension_drt,
         visualize_time=visualize_time,
@@ -128,6 +181,21 @@ def save_vis_dimension_drt(
     visualize_flexibility=True,
     format="png",
 ):
+    """
+    Saves a visualization of a multi-dimensional directly rooted tree (DRT) to a file.
+
+    Args:
+        multi_dimension_drt (TreeNode): The root of the multi-dimensional DRT to visualize.
+        file_path (str): The path where the visualization will be saved.
+        visualize_time (bool, optional): Whether to include the time dimension in the visualization. Defaults to True.
+        visualize_cost (bool, optional): Whether to include the cost dimension in the visualization. Defaults to True.
+        visualize_quality (bool, optional): Whether to include the quality dimension in the visualization. Defaults to True.
+        visualize_flexibility (bool, optional): Whether to include the flexibility dimension in the visualization. Defaults to True.
+        format (str, optional): The file format for the visualization output (e.g., "png"). Defaults to "png".
+
+    Returns:
+        None
+    """
     drt_string = get_multi_dimension_drt_string(
         multi_dimension_drt,
         visualize_time=visualize_time,
