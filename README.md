@@ -46,7 +46,7 @@ format_dictionary = {
 event_log = mddrt.log_formatter(raw_event_log, format_dictionary)
 
 ```
-### Discover Multi Dimension DRT
+### Discover Multi-Dimensional DRT
 
 ```py
 drt = mddrt.discover_multi_dimensional_drt(
@@ -67,7 +67,7 @@ grouped_drt = mddrt.group_drt_activities(drt)
 ### Get the DRT diagram string representation
 ```py
 mddrt_string = mpdfg.get_multi_dimension_drt_string(
-    multi_dimension_drt,
+    multi_dimensional_drt,
     visualize_time=True,
     visualize_cost=True,
     visualize_quality=True,
