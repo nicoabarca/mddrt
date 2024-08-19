@@ -13,7 +13,7 @@ from mddrt.tree_node import TreeNode
 from mddrt.utils.actions import save_graphviz_diagram
 
 
-def discover_multi_dimension_drt(
+def discover_multi_dimensional_drt(
     log,
     calculate_time=True,
     calculate_cost=True,
@@ -54,7 +54,7 @@ def discover_multi_dimension_drt(
         TreeNode: The root node of the constructed multi-dimensional Directly Rooted Tree (DRT).
 
     Example:
-        >>> drt = discover_multi_dimension_drt(log, calculate_time=True, calculate_cost=False)
+        >>> drt = discover_multi_dimensional_drt(log, calculate_time=True, calculate_cost=False)
         >>> print(drt)
 
     Notes:
@@ -74,14 +74,14 @@ def discover_multi_dimension_drt(
         calculate_quality,
         calculate_flexibility,
     )
-    multi_dimension_drt = DirectlyRootedTreeBuilder(log, parameters).get_tree()
+    multi_dimensional_drt = DirectlyRootedTreeBuilder(log, parameters).get_tree()
     if group_activities:
-        multi_dimension_drt = group_drt_activities(multi_dimension_drt)
+        multi_dimensional_drt = group_drt_activities(multi_dimensional_drt)
 
-    return multi_dimension_drt
+    return multi_dimensional_drt
 
 
-def group_drt_activities(multi_dimension_drt: TreeNode) -> TreeNode:
+def group_drt_activities(multi_dimensional_drt: TreeNode) -> TreeNode:
     """
     Groups activities in a multi-dimensional directly rooted tree (DRT).
 
@@ -91,12 +91,12 @@ def group_drt_activities(multi_dimension_drt: TreeNode) -> TreeNode:
     Returns:
         TreeNode: The root of the grouped multi-dimensional DRT.
     """
-    grouper = DirectedRootedTreeGrouper(multi_dimension_drt)
+    grouper = DirectedRootedTreeGrouper(multi_dimensional_drt)
     return grouper.get_tree()
 
 
-def get_multi_dimension_drt_string(
-    multi_dimension_drt: TreeNode,
+def get_multi_dimensional_drt_string(
+    multi_dimensional_drt: TreeNode,
     visualize_time: bool = True,
     visualize_cost: bool = True,
     visualize_quality: bool = True,
@@ -116,7 +116,7 @@ def get_multi_dimension_drt_string(
         str: A string representation of the multi-dimensional DRT diagram.
     """
     diagrammer = DirectlyRootedTreeDiagrammer(
-        multi_dimension_drt,
+        multi_dimensional_drt,
         visualize_time=visualize_time,
         visualize_cost=visualize_cost,
         visualize_quality=visualize_quality,
@@ -125,12 +125,12 @@ def get_multi_dimension_drt_string(
     return diagrammer.get_diagram_string()
 
 
-def view_multi_dimension_drt(
-    multi_dimension_drt: TreeNode,
-    visualize_time=True,
-    visualize_cost=True,
-    visualize_quality=True,
-    visualize_flexibility=True,
+def view_multi_dimensional_drt(
+    multi_dimensional_drt: TreeNode,
+    visualize_time: bool = True,
+    visualize_cost: bool = True,
+    visualize_quality: bool = True,
+    visualize_flexibility: bool = True,
     format="png",
 ) -> None:
     """
@@ -150,8 +150,8 @@ def view_multi_dimension_drt(
     Returns:
         None
     """
-    drt_string = get_multi_dimension_drt_string(
-        multi_dimension_drt,
+    drt_string = get_multi_dimensional_drt_string(
+        multi_dimensional_drt,
         visualize_time=visualize_time,
         visualize_cost=visualize_cost,
         visualize_quality=visualize_quality,
@@ -172,14 +172,14 @@ def view_multi_dimension_drt(
     plt.show()
 
 
-def save_vis_dimension_drt(
-    multi_dimension_drt,
-    file_path,
-    visualize_time=True,
-    visualize_cost=True,
-    visualize_quality=True,
-    visualize_flexibility=True,
-    format="png",
+def save_vis_multi_dimensional_drt(
+    multi_dimensional_drt: TreeNode,
+    file_path: str,
+    visualize_time: bool = True,
+    visualize_cost: bool = True,
+    visualize_quality: bool = True,
+    visualize_flexibility: bool = True,
+    format: str = "png",
 ):
     """
     Saves a visualization of a multi-dimensional directly rooted tree (DRT) to a file.
@@ -196,8 +196,8 @@ def save_vis_dimension_drt(
     Returns:
         None
     """
-    drt_string = get_multi_dimension_drt_string(
-        multi_dimension_drt,
+    drt_string = get_multi_dimensional_drt_string(
+        multi_dimensional_drt,
         visualize_time=visualize_time,
         visualize_cost=visualize_cost,
         visualize_quality=visualize_quality,
