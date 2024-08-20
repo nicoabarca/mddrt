@@ -36,9 +36,6 @@ class TreeNode:
                 return child
         return None
 
-    def update_name(self, name: str) -> None:
-        self.name = name
-
     def update_frequency(self) -> None:
         self.frequency += 1
 

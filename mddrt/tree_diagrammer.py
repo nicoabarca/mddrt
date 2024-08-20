@@ -145,7 +145,7 @@ class DirectlyRootedTreeDiagrammer:
         avg_total = (
             self.format_value("total", dimension, node)
             if dimension != "time"
-            else self.format_value("lead", dimension, node)
+            else self.format_value("service", dimension, node)
         )
         maximum = self.format_value("max", dimension, node)
         minimum = self.format_value("min", dimension, node)

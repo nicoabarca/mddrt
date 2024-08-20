@@ -1,16 +1,9 @@
-import shutil
-import tempfile
-
-import matplotlib.image as mpimg
-import matplotlib.pyplot as plt
-from graphviz import Source
-
 from mddrt.drt_parameters import DirectlyRootedTreeParameters
 from mddrt.tree_builder import DirectlyRootedTreeBuilder
 from mddrt.tree_diagrammer import DirectlyRootedTreeDiagrammer
 from mddrt.tree_grouper import DirectedRootedTreeGrouper
 from mddrt.tree_node import TreeNode
-from mddrt.utils.actions import save_graphviz_diagram
+from mddrt.utils.actions import save_graphviz_diagram, view_graphviz_diagram
 
 
 def discover_multi_dimensional_drt(
@@ -34,7 +27,7 @@ def discover_multi_dimensional_drt(
     quality, and flexibility, according to the specified parameters.
 
     Args:
-        log: The event log data to analyze, typically a DataFrame or similar structure.
+        log (pd.Dataframe): The event log data to analyze, typically a DataFrame or similar structure.
         calculate_time (bool, optional): Whether to calculate and include the time dimension in the DRT.
                                          Defaults to True.
         calculate_cost (bool, optional): Whether to calculate and include the cost dimension in the DRT.
@@ -157,19 +150,7 @@ def view_multi_dimensional_drt(
         visualize_quality=visualize_quality,
         visualize_flexibility=visualize_flexibility,
     )
-
-    tmp_file = tempfile.NamedTemporaryFile(suffix=".gv")
-    tmp_file.close()
-    src = Source(drt_string, tmp_file.name, format=format)
-
-    render = src.render(cleanup=True)
-    shutil.copyfile(render, tmp_file.name)
-
-    img = mpimg.imread(tmp_file.name)
-    plt.axis("off")
-    plt.tight_layout(pad=0, w_pad=0, h_pad=0)
-    plt.imshow(img)
-    plt.show()
+    view_graphviz_diagram(drt_string, format=format)
 
 
 def save_vis_multi_dimensional_drt(
