@@ -90,7 +90,7 @@ mpdfg.view_multi_dimensional_drt(
     format="png"
 )
 ```
-[!Warning]
+[!WARNING]
 Not all output file formats of Graphviz are disponible to display in environments like Jupyter Notebook or Google Colab.
 
 ### Save the generated DRT diagram
