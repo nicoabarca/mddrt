@@ -27,7 +27,7 @@ def dimensions_min_and_max(tree_root: TreeNode) -> dict[str, list[int]]:
         current_node = queue.popleft()
 
         dimensions_min_and_max["frequency"][0] = min(dimensions_min_and_max["frequency"][0], current_node.frequency)
-        dimensions_min_and_max["frequency"][1] = max(dimensions_min_and_max["frequency"][0], current_node.frequency)
+        dimensions_min_and_max["frequency"][1] = max(dimensions_min_and_max["frequency"][1], current_node.frequency)
 
         for dimension, data in current_node.dimensions_data.items():
             dimension_avg_total_case = (
@@ -36,7 +36,7 @@ def dimensions_min_and_max(tree_root: TreeNode) -> dict[str, list[int]]:
                 else (data["lead_case"] / current_node.frequency).total_seconds()
             )
             dimensions_min_and_max[dimension][0] = min(dimensions_min_and_max[dimension][0], dimension_avg_total_case)
-            dimensions_min_and_max[dimension][1] = max(dimensions_min_and_max[dimension][0], dimension_avg_total_case)
+            dimensions_min_and_max[dimension][1] = max(dimensions_min_and_max[dimension][1], dimension_avg_total_case)
 
         for child in current_node.children:
             queue.append(child)

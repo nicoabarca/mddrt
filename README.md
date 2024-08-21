@@ -1,5 +1,5 @@
 # Multi-Dimensional DRT Visualizer
-This Python package allows users to visualize Directly-Rooted Trees (DRTs) that represent various dimensions of data derived from event logs. It provides tools to create graphical representations of these multi-dimensional trees, enabling deeper insights into process behaviors and relationships. The diagrams are generated via [Graphviz](https://www.graphviz.org).
+This Python package allows users to visualize Directed Rooted Trees (DRTs) that represent various dimensions of data derived from event logs. It provides tools to create graphical representations of these multi-dimensional trees, enabling deeper insights into process behaviors and relationships. The diagrams are generated via [Graphviz](https://www.graphviz.org).
 
 
 # Installation
@@ -85,8 +85,14 @@ mpdfg.view_multi_dimensional_drt(
     visualize_cost=True,
     visualize_quality=True,
     visualize_flexibility=True,
+    node_measures=["total"], # accepts also "consumed" and "remaining"
+    arc_measures=["avg"], # accepts also "min" and "max", or you can keep this argument empty
+    format="png"
 )
 ```
+[!Warning]
+Not all output file formats of Graphviz are disponible to display in environments like Jupyter Notebook or Google Colab.
+
 ### Save the generated DRT diagram
 
 ```py
@@ -97,6 +103,8 @@ mpdfg.save_vis_multi_dimensional_drt(
     visualize_cost=True,
     visualize_quality=True,
     visualize_flexibility=True,
+    node_measures=["total"], # accepts also "consumed" and "remaining"
+    arc_measures=["avg"], # accepts also "min" and "max", or you can keep this argument empty
     format="png", # or pdf, webp, svg, etc.
 )
 ```

@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from graphviz import Source
 
 
@@ -9,11 +7,9 @@ def save_graphviz_diagram(drt_string: str, filename: str, format: str):
 
 
 def view_graphviz_diagram(drt_string: str, format: str):
+    filename = "tmp_source_file"
     graph = Source(drt_string)
-    graph_path = graph.render(filename="tmp_source_file", format=format, cleanup=True)
-
-    graphviz_source_file = "tmp_source_file.gv"
-    image_source_file = f"tmp_source_file.{format}"
+    graph_path = graph.render(filename=filename, format=format, cleanup=True)
 
     if is_google_colab() or is_jupyter_notebook():
         from IPython.display import Image, display
@@ -21,10 +17,6 @@ def view_graphviz_diagram(drt_string: str, format: str):
         display(Image(graph_path))
     else:
         graph.view()
-
-    if Path.exists(graphviz_source_file) or Path.exists(image_source_file):
-        Path.unlink(graphviz_source_file)
-        Path.unlink(image_source_file)
 
 
 def is_jupyter_notebook():

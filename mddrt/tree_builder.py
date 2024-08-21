@@ -46,7 +46,8 @@ class DirectlyRootedTreeBuilder:
         self.cases = cases
 
     def build_case_activities(self, case: tuple[Hashable, pd.DataFrame]) -> list[dict[str, any]]:
-        case_df = case[1]
+        case_df = case[1].sort_values(by=[self.params.timestamp_key])
+        case_df = case[1].sort_values(by=[self.params.start_timestamp_key])
         return [self.build_activity_dict(case_df, i) for i in range(len(case_df))]
 
     def build_activity_dict(self, case_df: pd.DataFrame, index: int) -> dict[str, any]:

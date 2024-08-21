@@ -48,6 +48,8 @@ class DirectlyRootedTreeDiagrammer:
         visualize_cost: bool = True,
         visualize_quality: bool = True,
         visualize_flexibility: bool = True,
+        node_measures: list[Literal["total", "consumed", "remaining"]] = ["total"],
+        arc_measures: list[Literal["avg", "min", "max"]] = [],
         rankdir: str = "TB",
     ) -> None:
         self.tree_root = tree_root
@@ -57,8 +59,10 @@ class DirectlyRootedTreeDiagrammer:
             visualize_quality,
             visualize_flexibility,
         )
+        self.node_measures = node_measures if node_measures != [] else ["total"]
+        self.arc_measures = arc_measures
         self.rankdir = rankdir
-        self.diagram = graphviz.Digraph("mddrt", comment="Multi Dimension Directly Rooted Tree")
+        self.diagram = graphviz.Digraph("mddrt", comment="Multi-Dimensional Directed Rooted Tree")
         self.dimensions_min_and_max = dimensions_min_and_max(self.tree_root)
         self.build_diagram()
 
@@ -109,9 +113,17 @@ class DirectlyRootedTreeDiagrammer:
         dimension_row = f"{dimension.capitalize()}<br/>"
         dimension_row += (
             f"Avg. {'Lead' if dimension == 'time' else 'Total Case'} {dimension.capitalize()}: {avg_total_case}<br/>"
+            if "total" in self.node_measures
+            else ""
         )
-        dimension_row += f"Avg. Consumed {dimension.capitalize()}: {avg_consumed}<br/>"
-        dimension_row += f"Avg. Remaining {dimension.capitalize()}: {avg_remaining}<br/>"
+        dimension_row += (
+            f"Avg. Consumed {dimension.capitalize()}: {avg_consumed}<br/>" if "consumed" in self.node_measures else ""
+        )
+        dimension_row += (
+            f"Avg. Remaining {dimension.capitalize()}: {avg_remaining}<br/>"
+            if "remaining" in self.node_measures
+            else ""
+        )
         data = node.dimensions_data[dimension]
         bg_color = background_color(
             (data["total_case"] if dimension != "time" else data["lead_case"]) / node.frequency,
@@ -142,6 +154,8 @@ class DirectlyRootedTreeDiagrammer:
         dimension: Literal["cost", "time", "flexibility", "quality"],
         node: TreeNode,
     ) -> str:
+        if len(self.arc_measures) == 0:
+            return " "
         avg_total = (
             self.format_value("total", dimension, node)
             if dimension != "time"
@@ -150,9 +164,9 @@ class DirectlyRootedTreeDiagrammer:
         maximum = self.format_value("max", dimension, node)
         minimum = self.format_value("min", dimension, node)
         link_row = f"{'Service' if dimension == 'time' else ''} {dimension.capitalize()}<br/>"
-        link_row += f"Avg: {avg_total}<br/>"
-        link_row += f"Max: {maximum}<br/>"
-        link_row += f"Min: {minimum}<br/>"
+        link_row += f"Avg: {avg_total}<br/>" if "avg" in self.arc_measures else ""
+        link_row += f"Max: {maximum}<br/>" if "max" in self.arc_measures else ""
+        link_row += f"Min: {minimum}<br/>" if "min" in self.arc_measures else ""
         return GRAPHVIZ_ACTIVITY_DATA.format(link_row)
 
     def format_value(

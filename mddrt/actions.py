@@ -1,3 +1,5 @@
+from typing import Literal
+
 from mddrt.drt_parameters import DirectlyRootedTreeParameters
 from mddrt.tree_builder import DirectlyRootedTreeBuilder
 from mddrt.tree_diagrammer import DirectlyRootedTreeDiagrammer
@@ -94,6 +96,8 @@ def get_multi_dimensional_drt_string(
     visualize_cost: bool = True,
     visualize_quality: bool = True,
     visualize_flexibility: bool = True,
+    node_measures: list[Literal["total", "consumed", "remaining"]] = ["total"],
+    arc_measures: list[Literal["avg", "min", "max"]] = ["avg"],
 ) -> str:
     """
     Generates a string representation of a multi-dimensional directly rooted tree (DRT) diagram.
@@ -114,6 +118,8 @@ def get_multi_dimensional_drt_string(
         visualize_cost=visualize_cost,
         visualize_quality=visualize_quality,
         visualize_flexibility=visualize_flexibility,
+        node_measures=node_measures,
+        arc_measures=arc_measures,
     )
     return diagrammer.get_diagram_string()
 
@@ -124,6 +130,8 @@ def view_multi_dimensional_drt(
     visualize_cost: bool = True,
     visualize_quality: bool = True,
     visualize_flexibility: bool = True,
+    node_measures: list[Literal["total", "consumed", "remaining"]] = ["total"],
+    arc_measures: list[Literal["avg", "min", "max"]] = ["avg"],
     format="png",
 ) -> None:
     """
@@ -136,6 +144,16 @@ def view_multi_dimensional_drt(
         visualize_quality (bool, optional): Whether to include the quality dimension in the visualization. Defaults to True.
         visualize_flexibility (bool, optional): Whether to include the flexibility dimension in the visualization. Defaults to True.
         format (str, optional): The file format of the visualization output (e.g., "png"). Defaults to "png".
+        node_measures (list[Literal["total", "consumed", "remaining"]], optional): The measures to include for each node in the visualization.
+            - "total": Total measure of the node.
+            - "consumed": Consumed measure of the node.
+            - "remaining": Remaining measure of the node.
+            Defaults to ["total"].
+        arc_measures (list[Literal["avg", "min", "max"]], optional): The measures to include for each arc in the visualization.
+            - "avg": Average measure of the arc.
+            - "min": Minimum measure of the arc.
+            - "max": Maximum measure of the arc.
+            Defaults to [].
 
     Raises:
         IOError: If the temporary file cannot be created or read.
@@ -149,6 +167,8 @@ def view_multi_dimensional_drt(
         visualize_cost=visualize_cost,
         visualize_quality=visualize_quality,
         visualize_flexibility=visualize_flexibility,
+        node_measures=node_measures,
+        arc_measures=arc_measures,
     )
     view_graphviz_diagram(drt_string, format=format)
 
@@ -160,6 +180,8 @@ def save_vis_multi_dimensional_drt(
     visualize_cost: bool = True,
     visualize_quality: bool = True,
     visualize_flexibility: bool = True,
+    node_measures: list[Literal["total", "consumed", "remaining"]] = ["total"],
+    arc_measures: list[Literal["avg", "min", "max"]] = [],
     format: str = "png",
 ):
     """
@@ -173,6 +195,16 @@ def save_vis_multi_dimensional_drt(
         visualize_quality (bool, optional): Whether to include the quality dimension in the visualization. Defaults to True.
         visualize_flexibility (bool, optional): Whether to include the flexibility dimension in the visualization. Defaults to True.
         format (str, optional): The file format for the visualization output (e.g., "png"). Defaults to "png".
+        node_measures (list[Literal["total", "consumed", "remaining"]], optional): The measures to include for each node in the visualization.
+            - "total": Total measure of the node.
+            - "consumed": Consumed measure of the node.
+            - "remaining": Remaining measure of the node.
+            Defaults to ["total"].
+        arc_measures (list[Literal["avg", "min", "max"]], optional): The measures to include for each arc in the visualization.
+            - "avg": Average measure of the arc.
+            - "min": Minimum measure of the arc.
+            - "max": Maximum measure of the arc.
+            Defaults to [].
 
     Returns:
         None
@@ -183,5 +215,7 @@ def save_vis_multi_dimensional_drt(
         visualize_cost=visualize_cost,
         visualize_quality=visualize_quality,
         visualize_flexibility=visualize_flexibility,
+        node_measures=node_measures,
+        arc_measures=arc_measures,
     )
     save_graphviz_diagram(drt_string, file_path, format)
