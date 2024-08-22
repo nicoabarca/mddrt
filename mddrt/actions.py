@@ -108,7 +108,16 @@ def get_multi_dimensional_drt_string(
         visualize_cost (bool, optional): Whether to include the cost dimension in the visualization. Defaults to True.
         visualize_quality (bool, optional): Whether to include the quality dimension in the visualization. Defaults to True.
         visualize_flexibility (bool, optional): Whether to include the flexibility dimension in the visualization. Defaults to True.
-
+        node_measures (list[Literal["total", "consumed", "remaining"]], optional): The measures to include for each node in the visualization.
+            - "total": Total measure of the node.
+            - "consumed": Consumed measure of the node.
+            - "remaining": Remaining measure of the node.
+            Defaults to ["total"].
+        arc_measures (list[Literal["avg", "min", "max"]], optional): The measures to include for each arc in the visualization.
+            - "avg": Average measure of the arc.
+            - "min": Minimum measure of the arc.
+            - "max": Maximum measure of the arc.
+            Defaults to [].
     Returns:
         str: A string representation of the multi-dimensional DRT diagram.
     """
@@ -131,7 +140,7 @@ def view_multi_dimensional_drt(
     visualize_quality: bool = True,
     visualize_flexibility: bool = True,
     node_measures: list[Literal["total", "consumed", "remaining"]] = ["total"],
-    arc_measures: list[Literal["avg", "min", "max"]] = ["avg"],
+    arc_measures: list[Literal["avg", "min", "max"]] = [],
     format="png",
 ) -> None:
     """
