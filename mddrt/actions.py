@@ -141,7 +141,7 @@ def view_multi_dimensional_drt(
     visualize_flexibility: bool = True,
     node_measures: list[Literal["total", "consumed", "remaining"]] = ["total"],
     arc_measures: list[Literal["avg", "min", "max"]] = [],
-    format="png",
+    format="jpg",
 ) -> None:
     """
     Visualizes a multi-dimensional directly rooted tree (DRT) using a graphical format.
@@ -152,7 +152,7 @@ def view_multi_dimensional_drt(
         visualize_cost (bool, optional): Whether to include the cost dimension in the visualization. Defaults to True.
         visualize_quality (bool, optional): Whether to include the quality dimension in the visualization. Defaults to True.
         visualize_flexibility (bool, optional): Whether to include the flexibility dimension in the visualization. Defaults to True.
-        format (str, optional): The file format of the visualization output (e.g., "png"). Defaults to "png".
+        format (str, optional): The file format of the visualization output (e.g., "jpg", "png", "jpeg", "webp"). Defaults to "jpg".
         node_measures (list[Literal["total", "consumed", "remaining"]], optional): The measures to include for each node in the visualization.
             - "total": Total measure of the node.
             - "consumed": Consumed measure of the node.
@@ -170,6 +170,7 @@ def view_multi_dimensional_drt(
     Returns:
         None
     """
+
     drt_string = get_multi_dimensional_drt_string(
         multi_dimensional_drt,
         visualize_time=visualize_time,
