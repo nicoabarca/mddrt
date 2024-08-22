@@ -97,7 +97,7 @@ def get_multi_dimensional_drt_string(
     visualize_quality: bool = True,
     visualize_flexibility: bool = True,
     node_measures: list[Literal["total", "consumed", "remaining"]] = ["total"],
-    arc_measures: list[Literal["avg", "min", "max"]] = ["avg"],
+    arc_measures: list[Literal["avg", "min", "max"]] = [],
 ) -> str:
     """
     Generates a string representation of a multi-dimensional directly rooted tree (DRT) diagram.
