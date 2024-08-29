@@ -144,7 +144,8 @@ class DirectlyRootedTreeDiagrammer:
             )
 
     def build_link_label(self, node: TreeNode) -> str:
-        content = GRAPHVIZ_ACTIVITY_DATA.format(f"{node.name} ({node.frequency})")
+        node_name = self.build_node_name(node)
+        content = GRAPHVIZ_ACTIVITY_DATA.format(node_name)
         for dimension in self.dimensions_to_diagram:
             content += self.build_link_string(dimension, node)
         return GRAPHVIZ_ACTIVITY.format(content)
@@ -189,6 +190,13 @@ class DirectlyRootedTreeDiagrammer:
         if dimension == "cost":
             return f"{abs(round(value,2))} USD"
         return str(abs(round(value, 2)))
+
+    def build_node_name(self, node: TreeNode):
+        node_name = node.name
+        if "&" in node_name:  # checking for special characters
+            node_name = node_name.replace("&", "&amp;")
+
+        return f"{node_name} ({node.frequency})"
 
     def get_diagram_string(self) -> str:
         return self.diagram.source
