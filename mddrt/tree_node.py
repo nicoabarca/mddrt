@@ -2,13 +2,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal
 
-import pandas as pd
-
 from mddrt.utils.builder import activities_dimension_cumsum, create_dimensions_data
 from mddrt.utils.misc import pretty_format_dict
 
 if TYPE_CHECKING:
-    import pandas as pd
+    from datetime import timedelta
 
 
 class TreeNode:
@@ -55,7 +53,6 @@ class TreeNode:
         waiting_time = activity["waiting_time"]
         lead_time = service_time + waiting_time
         lead_accumulated = activities_dimension_cumsum(current_case, "time")[depth]
-
         time_data["service"] += service_time
         time_data["waiting"] += waiting_time
         time_data["lead"] += lead_time
@@ -93,7 +90,7 @@ class TreeNode:
         dimension_data["accumulated"] += dimension_cumsum
         dimension_data["remainder"] = dimension_data["total_case"] - dimension_data["accumulated"]
 
-    def update_min_max(self, dimension_data: dict, value_to_compare: float | pd.Timedelta) -> None:
+    def update_min_max(self, dimension_data: dict, value_to_compare: float | timedelta) -> None:
         dimension_data["max"] = max(dimension_data["max"], value_to_compare)
         dimension_data["min"] = min(dimension_data["min"], value_to_compare)
 

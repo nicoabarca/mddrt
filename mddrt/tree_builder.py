@@ -4,6 +4,7 @@ from datetime import timedelta
 from typing import TYPE_CHECKING
 
 import pandas as pd
+from tqdm import tqdm
 
 from mddrt.tree_node import TreeNode
 from mddrt.utils.builder import calculate_cases_metrics, dimensions_to_calculate
@@ -34,7 +35,8 @@ class DirectlyRootedTreeBuilder:
     def build_cases(self, cases_grouped_by_id: DataFrameGroupBy) -> None:
         cases = {}
         cases_metrics = calculate_cases_metrics(self.log, self.params)
-        for case in cases_grouped_by_id:
+        print("Building Tree Cases:")
+        for case in tqdm(cases_grouped_by_id):
             case_id = case[0]
             cases[case_id] = {}
             case_activities = self.build_case_activities(case)
@@ -42,7 +44,11 @@ class DirectlyRootedTreeBuilder:
             cases[case_id]["activities"] = case_activities
             metrics_mapping = {"cost": "Cost", "time": "Duration", "flexibility": "Optionality", "quality": "Rework"}
             for dimension in self.dimensions_to_calculate:
-                cases[case_id][dimension] = case_metrics[metrics_mapping[dimension]]
+                if dimension == "time":
+                    cases[case_id][dimension] = case_metrics[metrics_mapping[dimension]].to_pytimedelta()
+                else:
+                    cases[case_id][dimension] = case_metrics[metrics_mapping[dimension]]
+
         self.cases = cases
 
     def build_case_activities(self, case: tuple[Hashable, pd.DataFrame]) -> list[dict[str, any]]:
@@ -61,21 +67,26 @@ class DirectlyRootedTreeBuilder:
             activity_dict.update(self.calculate_time_data(case_df, index))
         return activity_dict
 
-    def calculate_time_data(self, case_df: pd.DataFrame, index: int) -> dict[str, pd.Timedelta]:
+    def calculate_time_data(self, case_df: pd.DataFrame, index: int) -> dict[str, timedelta]:
         actual_activity = case_df.iloc[index]
-        service_time = actual_activity[self.params.timestamp_key] - actual_activity[self.params.start_timestamp_key]
+        service_time = (
+            actual_activity[self.params.timestamp_key] - actual_activity[self.params.start_timestamp_key]
+        ).to_pytimedelta()
 
         prev_activity = case_df.iloc[index - 1] if index > 0 else None
         waiting_time = (
-            actual_activity[self.params.start_timestamp_key] - prev_activity[self.params.timestamp_key]
+            (
+                actual_activity[self.params.start_timestamp_key] - prev_activity[self.params.timestamp_key]
+            ).to_pytimedelta()
             if prev_activity is not None
-            else pd.Timedelta(0)
+            else timedelta(0)
         )
         return {"service_time": service_time, "waiting_time": waiting_time}
 
     def build_tree(self) -> None:
         root = self.tree
-        for current_case in self.cases.values():
+        print("Building Tree Graph:")
+        for current_case in tqdm(self.cases.values()):
             self.add_case_to_tree(root, current_case)
         self.tree = root
 

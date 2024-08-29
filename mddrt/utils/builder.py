@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import timedelta
 from itertools import accumulate
 from sys import maxsize
 from typing import TYPE_CHECKING, Literal
@@ -81,21 +82,21 @@ def create_default_data(data_type: Literal["numeric", "timedelta"]) -> dict:
             "min": maxsize,
         }
     return {
-        "lead": pd.Timedelta(days=0),
-        "lead_case": pd.Timedelta(days=0),
-        "lead_remainder": pd.Timedelta(days=0),
-        "lead_accumulated": pd.Timedelta(days=0),
-        "max": pd.Timedelta(days=0),
-        "min": pd.Timedelta.max,
-        "service": pd.Timedelta(days=0),
-        "waiting": pd.Timedelta(days=0),
+        "lead": timedelta(days=0),
+        "lead_case": timedelta(days=0),
+        "lead_remainder": timedelta(days=0),
+        "lead_accumulated": timedelta(days=0),
+        "max": timedelta(days=0),
+        "min": timedelta.max,
+        "service": timedelta(days=0),
+        "waiting": timedelta(days=0),
     }
 
 
 def activities_dimension_cumsum(
     current_case: dict,
     dimension: Literal["cost", "time", "flexibility", "quality"],
-) -> list[int | pd.Timedelta]:
+) -> list[int | timedelta]:
     activities = current_case["activities"]
     if dimension == "time":
         dimension_data = [item["service_time"] + item["waiting_time"] for item in activities]
