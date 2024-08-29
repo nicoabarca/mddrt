@@ -1,5 +1,7 @@
 from typing import Literal
 
+import pandas as pd
+
 from mddrt.drt_parameters import DirectlyRootedTreeParameters
 from mddrt.tree_builder import DirectlyRootedTreeBuilder
 from mddrt.tree_diagrammer import DirectlyRootedTreeDiagrammer
@@ -9,17 +11,17 @@ from mddrt.utils.actions import save_graphviz_diagram, view_graphviz_diagram
 
 
 def discover_multi_dimensional_drt(
-    log,
-    calculate_time=True,
-    calculate_cost=True,
-    calculate_quality=True,
-    calculate_flexibility=True,
-    group_activities=False,
-    case_id_key="case:concept:name",
-    activity_key="concept:name",
-    timestamp_key="time:timestamp",
-    start_timestamp_key="start_timestamp",
-    cost_key="cost:total",
+    log: pd.DataFrame,
+    calculate_time: bool = True,
+    calculate_cost: bool = True,
+    calculate_quality: bool = True,
+    calculate_flexibility: bool = True,
+    group_activities: bool = False,
+    case_id_key: str = "case:concept:name",
+    activity_key: str = "concept:name",
+    timestamp_key: str = "time:timestamp",
+    start_timestamp_key: str = "start_timestamp",
+    cost_key: str = "cost:total",
 ) -> TreeNode:
     """
     Discovers and constructs a multi-dimensional Directly Rooted Tree (DRT) from the provided event log.
@@ -71,12 +73,12 @@ def discover_multi_dimensional_drt(
     )
     multi_dimensional_drt = DirectlyRootedTreeBuilder(log, parameters).get_tree()
     if group_activities:
-        multi_dimensional_drt = group_drt_activities(multi_dimensional_drt)
+        multi_dimensional_drt = automatic_group_drt_activities(multi_dimensional_drt)
 
     return multi_dimensional_drt
 
 
-def group_drt_activities(multi_dimensional_drt: TreeNode) -> TreeNode:
+def automatic_group_drt_activities(multi_dimensional_drt: TreeNode) -> TreeNode:
     """
     Groups activities in a multi-dimensional directly rooted tree (DRT).
 
@@ -204,7 +206,7 @@ def save_vis_multi_dimensional_drt(
         visualize_cost (bool, optional): Whether to include the cost dimension in the visualization. Defaults to True.
         visualize_quality (bool, optional): Whether to include the quality dimension in the visualization. Defaults to True.
         visualize_flexibility (bool, optional): Whether to include the flexibility dimension in the visualization. Defaults to True.
-        format (str, optional): The file format for the visualization output (e.g., "png"). Defaults to "png".
+        format (str, optional): The file format for the visualization output (e.g., "jpg", "png", "webp", "svg"). Defaults to "png".
         node_measures (list[Literal["total", "consumed", "remaining"]], optional): The measures to include for each node in the visualization.
             - "total": Total measure of the node.
             - "consumed": Consumed measure of the node.
