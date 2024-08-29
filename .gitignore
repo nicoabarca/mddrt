@@ -1,6 +1,9 @@
 # Data
 data/
 
+#Main
+main.py
+
 # OS
 .DS_STORE
 
