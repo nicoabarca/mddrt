@@ -37,14 +37,14 @@ def view_graphviz_diagram(drt_string: str, format: str):
 
         with tempfile.NamedTemporaryFile(suffix=f".{format}", delete=False) as temp_file:
             temp_file_path = temp_file.name
-            graph_path = graph.render(filename=temp_file_path, format=file_format, cleanup=True)
+        graph_path = graph.render(filename=temp_file_path, format=file_format, cleanup=True)
 
-            if platform.system() == "Darwin":  # macOS
-                subprocess.call(("open", f"{temp_file_path}.{format}"))
-            elif platform.system() == "Windows":  # Windows
-                os.startfile(f"{temp_file_path}.{format}")
-            else:  # linux variants
-                subprocess.call(("xdg-open", f"{temp_file_path}.{format}"))
+        if platform.system() == "Darwin":  # macOS
+            subprocess.call(("open", f"{temp_file_path}.{format}"))
+        elif platform.system() == "Windows":  # Windows
+            os.startfile(f"{temp_file_path}.{format}")
+        else:  # linux variants
+            subprocess.call(("xdg-open", f"{temp_file_path}.{format}"))
 
 
 def is_jupyter_notebook():
