@@ -35,7 +35,7 @@ def view_graphviz_diagram(drt_string: str, format: str):
             msg_error = "Format value should be a valid image extension for interactive Python Environments. Options are 'jpg', 'png', 'jpeq', 'webp' or 'svg'"
             raise ValueError(msg_error)
 
-        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+        with tempfile.NamedTemporaryFile(suffix=f".{format}", delete=False) as temp_file:
             temp_file_path = temp_file.name
             graph_path = graph.render(filename=temp_file_path, format=file_format, cleanup=True)
 
