@@ -87,7 +87,7 @@ mpdfg.view_multi_dimensional_drt(
     visualize_flexibility=True,
     node_measures=["total"], # accepts also "consumed" and "remaining"
     arc_measures=[], # accepts "avg", "min" and "max", or you can keep this argument empty
-    format="jpg" # Format value should be a valid image extension like 'jpg', 'png', 'jpeq' or 'webp
+    format="svg" # Format value should be a valid image extension like 'jpg', 'png', 'jpeq' or 'webp
 )
 ```
 > **WARNING**
@@ -105,7 +105,7 @@ mpdfg.save_vis_multi_dimensional_drt(
     visualize_flexibility=True,
     node_measures=["total"], # accepts also "consumed" and "remaining"
     arc_measures=[], # accepts "avg", "min" and "max", or you can keep this argument empty
-    format="png", # or pdf, webp, svg, etc.
+    format="svg", # or pdf, webp, svg, etc.
 )
 ```
 

@@ -1,4 +1,7 @@
 import os
+import platform
+import subprocess
+import tempfile
 
 from graphviz import Source
 
@@ -14,13 +17,17 @@ def view_graphviz_diagram(drt_string: str, format: str):
     graph = Source(drt_string)
 
     if is_google_colab() or is_jupyter_notebook():
-        if format not in ["jpg", "png", "jpeg"]:
-            msg_error = "Format value should be a valid image extension for interactive Python Environments. Options are 'jpg', 'png' or 'jpeq'"
+        if format not in ["jpg", "png", "jpeg", "svg"]:
+            msg_error = "Format value should be a valid image extension for interactive Python Environments. Options are 'jpg', 'png', 'jpeq' or 'svg'"
             raise ValueError(msg_error)
-        from IPython.display import Image, display
+        from IPython.display import SVG, Image, display
 
         graph_path = graph.render(filename=filename, format=file_format, cleanup=True)
-        display(Image(graph_path))
+
+        if format == "svg":
+            display(SVG(filename=graph_path))
+        else:
+            display(Image(graph_path))
     else:
         from PIL import Image
 
@@ -28,10 +35,16 @@ def view_graphviz_diagram(drt_string: str, format: str):
             msg_error = "Format value should be a valid image extension for interactive Python Environments. Options are 'jpg', 'png', 'jpeq', 'webp' or 'svg'"
             raise ValueError(msg_error)
 
-        graph_path = graph.render(filename=filename, format=file_format, cleanup=True)
-        img = Image.open(graph_path)
-        img.show()
-        os.remove(graph_path)
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            temp_file_path = temp_file.name
+            graph_path = graph.render(filename=temp_file_path, format=file_format, cleanup=True)
+
+            if platform.system() == "Darwin":  # macOS
+                subprocess.call(("open", f"{temp_file_path}.{format}"))
+            elif platform.system() == "Windows":  # Windows
+                os.startfile(f"{temp_file_path}.{format}")
+            else:  # linux variants
+                subprocess.call(("xdg-open", f"{temp_file_path}.{format}"))
 
 
 def is_jupyter_notebook():

@@ -73,14 +73,14 @@ def discover_multi_dimensional_drt(
     )
     multi_dimensional_drt = DirectlyRootedTreeBuilder(log, parameters).get_tree()
     if group_activities:
-        multi_dimensional_drt = automatic_group_drt_activities(multi_dimensional_drt)
+        multi_dimensional_drt = group_drt_activities(multi_dimensional_drt)
 
     return multi_dimensional_drt
 
 
-def automatic_group_drt_activities(multi_dimensional_drt: TreeNode) -> TreeNode:
+def group_drt_activities(multi_dimensional_drt: TreeNode) -> TreeNode:
     """
-    Groups activities in a multi-dimensional directly rooted tree (DRT).
+    Groups activities in a multi-dimensional directed rooted tree (DRT).
 
     Args:
         multi_dimension_drt (TreeNode): The root of the multi-dimensional DRT.
@@ -143,7 +143,7 @@ def view_multi_dimensional_drt(
     visualize_flexibility: bool = True,
     node_measures: list[Literal["total", "consumed", "remaining"]] = ["total"],
     arc_measures: list[Literal["avg", "min", "max"]] = [],
-    format="jpg",
+    format="svg",
 ) -> None:
     """
     Visualizes a multi-dimensional directly rooted tree (DRT) using a graphical format.
@@ -154,7 +154,7 @@ def view_multi_dimensional_drt(
         visualize_cost (bool, optional): Whether to include the cost dimension in the visualization. Defaults to True.
         visualize_quality (bool, optional): Whether to include the quality dimension in the visualization. Defaults to True.
         visualize_flexibility (bool, optional): Whether to include the flexibility dimension in the visualization. Defaults to True.
-        format (str, optional): The file format of the visualization output (e.g., "jpg", "png", "jpeg", "webp"). Defaults to "jpg".
+        format (str, optional): The file format of the visualization output (e.g., "jpg", "png", "jpeg", "svg", "webp"). Defaults to "svg".
         node_measures (list[Literal["total", "consumed", "remaining"]], optional): The measures to include for each node in the visualization.
             - "total": Total measure of the node.
             - "consumed": Consumed measure of the node.
@@ -194,7 +194,7 @@ def save_vis_multi_dimensional_drt(
     visualize_flexibility: bool = True,
     node_measures: list[Literal["total", "consumed", "remaining"]] = ["total"],
     arc_measures: list[Literal["avg", "min", "max"]] = [],
-    format: str = "png",
+    format: str = "svg",
 ):
     """
     Saves a visualization of a multi-dimensional directly rooted tree (DRT) to a file.
@@ -206,7 +206,7 @@ def save_vis_multi_dimensional_drt(
         visualize_cost (bool, optional): Whether to include the cost dimension in the visualization. Defaults to True.
         visualize_quality (bool, optional): Whether to include the quality dimension in the visualization. Defaults to True.
         visualize_flexibility (bool, optional): Whether to include the flexibility dimension in the visualization. Defaults to True.
-        format (str, optional): The file format for the visualization output (e.g., "jpg", "png", "webp", "svg"). Defaults to "png".
+        format (str, optional): The file format for the visualization output (e.g., "jpg", "jpeg", "png", "webp", "svg"). Defaults to "svg".
         node_measures (list[Literal["total", "consumed", "remaining"]], optional): The measures to include for each node in the visualization.
             - "total": Total measure of the node.
             - "consumed": Consumed measure of the node.
