@@ -6,4 +6,4 @@ from mddrt.actions import (
     view_multi_dimensional_drt,
 )
 from mddrt.log_formatter import log_formatter
-from mddrt.log_manual_grouper import log_manual_grouper
+from mddrt.manual_log_grouping import manual_log_grouping
