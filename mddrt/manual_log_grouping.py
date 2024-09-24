@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pandas as pd
+from tqdm import tqdm
 
 if TYPE_CHECKING:
     from time import timedelta
@@ -31,7 +32,6 @@ class ManualLogGrouping:
         self.actual_activities_grouping_index: int = 0
         self.validate_activities_to_group()
         self.group()
-        self.get_grouped_log()
 
     def validate_activities_to_group(self):
         unique_activities_names = set(self.log[self.activity_id_key].unique())
@@ -42,7 +42,8 @@ class ManualLogGrouping:
 
     def group(self):
         cases_grouped_by_id = self.log.groupby(self.case_id_key, dropna=True, sort=False)
-        for _, actual_case in cases_grouped_by_id:
+        print("Manual groping log:")
+        for _, actual_case in tqdm(cases_grouped_by_id):
             self.iterate_case_rows(actual_case)
 
     def iterate_case_rows(self, df: pd.DataFrame):
@@ -140,6 +141,30 @@ def manual_log_grouping(
     start_timestamp_key: str | None = "start_timestamp",
     timestamp_key: str = "time:timestamp",
 ) -> pd.DataFrame:
+    """
+    Groups specified activities in a process log into a single activity group.
+
+    This function takes a process log as a pandas DataFrame and groups the specified
+    activities defined in `activities_to_group`. It uses the provided case identifier,
+    activity identifier, and timestamp keys to perform the grouping. Optionally, a
+    `start_timestamp_key` can be provided for logs with start times.
+
+    Args:
+        log (pd.DataFrame): The input process log DataFrame containing the events.
+        activities_to_group (set[str]): A set of activity names (strings) to group together.
+        case_id_key (str, optional): The key in the DataFrame that represents the case ID.
+            Defaults to "case:concept:name".
+        activity_id_key (str, optional): The key in the DataFrame that represents the activity name.
+            Defaults to "concept:name".
+        start_timestamp_key (str | None, optional): The key in the DataFrame representing the start
+            timestamp of the events. Can be None if not available. Defaults to "start_timestamp".
+        timestamp_key (str, optional): The key in the DataFrame representing the event timestamp.
+            Defaults to "time:timestamp".
+
+    Returns:
+        pd.DataFrame: A new DataFrame with the grouped activities, keeping the original structure
+        of the log but modifying the activities defined in `activities_to_group`.
+    """
     manual_log_grouping = ManualLogGrouping(
         log, activities_to_group, case_id_key, activity_id_key, start_timestamp_key, timestamp_key
     )
