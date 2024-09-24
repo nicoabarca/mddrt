@@ -37,7 +37,7 @@ class ManualLogGrouping:
         unique_activities_names = set(self.log[self.activity_id_key].unique())
         diff_between_sets = self.activities_to_group - unique_activities_names
         if len(diff_between_sets) != 0:
-            error_message = f"Activities to group: {diff_between_sets} are not in log activity names."
+            error_message = f"Activities to group: {diff_between_sets} are not in log activity names or activities to group is empty"
             raise ValueError(error_message)
 
     def group(self):
