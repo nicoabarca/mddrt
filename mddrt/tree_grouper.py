@@ -11,6 +11,10 @@ class DirectedRootedTreeGrouper:
         self.start_group()
 
     def start_group(self) -> None:
+        import sys
+
+        sys.setrecursionlimit(10**6)
+
         for child in self.tree.children:
             self.traverse_to_group(child)
 
