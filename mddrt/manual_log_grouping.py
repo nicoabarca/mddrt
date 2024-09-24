@@ -42,7 +42,7 @@ class ManualLogGrouping:
 
     def group(self):
         cases_grouped_by_id = self.log.groupby(self.case_id_key, dropna=True, sort=False)
-        print("Manual groping log:")
+        print("Manual log grouping:")
         for _, actual_case in tqdm(cases_grouped_by_id):
             self.iterate_case_rows(actual_case)
 
