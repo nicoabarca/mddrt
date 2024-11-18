@@ -14,13 +14,15 @@ class ManualLogGrouping:
         self,
         log: pd.DataFrame,
         activities_to_group: set[str],
+        group_name: str,
         case_id_key: str = "case:concept:name",
         activity_id_key: str = "concept:name",
         start_timestamp_key: str | None = "start_timestamp",
         timestamp_key: str = "time:timestamp",
     ) -> None:
         self.log: pd.DataFrame = log
-        self.activities_to_group: set[str] = activities_to_group
+        self.activities_to_group: list[str] = activities_to_group
+        self.group_name: str = self.set_group_name(group_name, activities_to_group)
         self.case_id_key: str = case_id_key
         self.activity_id_key: str = activity_id_key
         self.start_timestamp_key: str | None = start_timestamp_key
@@ -33,11 +35,16 @@ class ManualLogGrouping:
         self.validate_activities_to_group()
         self.group()
 
+    def set_group_name(self, group_name: str | None, activities_to_group: list[str]):
+        if group_name:
+            return group_name
+        return "[" + ",".join(activities_to_group) + "]"
+
     def validate_activities_to_group(self):
         unique_activities_names = set(self.log[self.activity_id_key].unique())
-        diff_between_sets = self.activities_to_group - unique_activities_names
+        diff_between_sets = set(self.activities_to_group) - unique_activities_names
         if len(diff_between_sets) != 0:
-            error_message = f"Activities to group: {diff_between_sets} are not in log activity names or activities to group is empty"
+            error_message = f"Activities to group: {diff_between_sets} are not in log activity names, activities to group is empty or activities to group have duplicated entries."
             raise ValueError(error_message)
 
     def group(self):
@@ -50,7 +57,6 @@ class ManualLogGrouping:
         for _, row in df.iterrows():
             if self.is_activities_left_to_be_grouped_empty():
                 self.reset_activities_left_to_be_grouped()
-
             if self.is_activity_in_activities_left_to_be_grouped(row):
                 self.group_activities(row)
             else:
@@ -64,7 +70,7 @@ class ManualLogGrouping:
             base_activity = self.grouped_log[str(self.actual_activities_grouping_index)]
             self.merge_activities(base_activity, incoming_activity)
 
-        self.activities_left_to_be_grouped.discard(incoming_activity[self.activity_id_key])
+        self.activities_left_to_be_grouped.remove(incoming_activity[self.activity_id_key])
 
     def add_activity_to_log(self, row: pd.Series) -> None:
         self.grouped_log[str(self.actual_activities_index)] = row
@@ -73,7 +79,7 @@ class ManualLogGrouping:
     def merge_activities(self, base_activity: pd.Series, incoming_activity: pd.Series) -> pd.Series:
         activity_data = []
         for column_name in self.log_columns:
-            if column_name in [self.case_id_key, self.start_timestamp_key, self.timestamp_key]:
+            if column_name in [self.case_id_key, self.activity_id_key, self.start_timestamp_key, self.timestamp_key]:
                 value = self.merge_value_based_on_column_name(column_name, base_activity, incoming_activity)
             else:
                 value = self.merge_value_based_on_data_type(column_name, base_activity, incoming_activity)
@@ -101,9 +107,11 @@ class ManualLogGrouping:
     ) -> int | timedelta:
         if column_name == self.case_id_key:
             return base_activity[self.case_id_key]
+        if column_name == self.activity_id_key:
+            return self.group_name
         if column_name == self.start_timestamp_key:
             return min(base_activity[self.start_timestamp_key], incoming_activity[self.start_timestamp_key])
-        return max(base_activity[self.start_timestamp_key], incoming_activity[self.start_timestamp_key])
+        return max(base_activity[self.timestamp_key], incoming_activity[self.timestamp_key])
 
     def merge_value_based_on_data_type(
         self, column_name: str, base_activity: pd.Series, incoming_activity: pd.Series
@@ -135,7 +143,8 @@ class ManualLogGrouping:
 
 def manual_log_grouping(
     log: pd.DataFrame,
-    activities_to_group: set[str],
+    activities_to_group: list[str],
+    group_name: str | None = None,
     case_id_key: str = "case:concept:name",
     activity_id_key: str = "concept:name",
     start_timestamp_key: str | None = "start_timestamp",
@@ -151,7 +160,8 @@ def manual_log_grouping(
 
     Args:
         log (pd.DataFrame): The input process log DataFrame containing the events.
-        activities_to_group (set[str]): A set of activity names (strings) to group together.
+        activities_to_group (list[str]): A list of activity names (strings) to group together.
+        group_name (str | None): Name of the node with the grouped activities. Defaults to None.
         case_id_key (str, optional): The key in the DataFrame that represents the case ID.
             Defaults to "case:concept:name".
         activity_id_key (str, optional): The key in the DataFrame that represents the activity name.
@@ -166,6 +176,6 @@ def manual_log_grouping(
         of the log but modifying the activities defined in `activities_to_group`.
     """
     manual_log_grouping = ManualLogGrouping(
-        log, activities_to_group, case_id_key, activity_id_key, start_timestamp_key, timestamp_key
+        log, activities_to_group, group_name, case_id_key, activity_id_key, start_timestamp_key, timestamp_key
     )
     return manual_log_grouping.get_grouped_log()
