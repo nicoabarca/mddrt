@@ -51,7 +51,7 @@ class DirectedRootedTreeGrouper:
         self.replace_old_nodes_with_new(parent_node, new_node, nodes)
 
     def create_new_node_name(self, nodes: list[TreeNode]) -> str:
-        return f"From {nodes[0].name} to {nodes[-1].name}"
+        return f"{nodes[0].name}<br/> Activities in between: {len(nodes) - 2}<br/> {nodes[-1].name}"
 
     def replace_old_nodes_with_new(self, parent_node: TreeNode, new_node: TreeNode, nodes: list[TreeNode]) -> None:
         first_node_index = parent_node.children.index(nodes[0])

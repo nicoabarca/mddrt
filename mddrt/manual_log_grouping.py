@@ -35,25 +35,29 @@ class ManualLogGrouping:
         self.validate_activities_to_group()
         self.group()
 
-    def set_group_name(self, group_name: str | None, activities_to_group: list[str]):
+    def set_group_name(self, group_name: str | None, activities_to_group: list[str]) -> str:
         if group_name:
             return group_name
         return "[" + ",".join(activities_to_group) + "]"
 
-    def validate_activities_to_group(self):
+    def validate_activities_to_group(self) -> None | ValueError:
         unique_activities_names = set(self.log[self.activity_id_key].unique())
         diff_between_sets = set(self.activities_to_group) - unique_activities_names
+        has_duplicated = len(self.activities_to_group) != len(set(self.activities_to_group))
         if len(diff_between_sets) != 0:
-            error_message = f"Activities to group: {diff_between_sets} are not in log activity names, activities to group is empty or activities to group have duplicated entries."
+            error_message = f"Activities to group: {diff_between_sets} are not in log activity names or activities to group is empty."
+            raise ValueError(error_message)
+        if has_duplicated:
+            error_message = "Activities to group has duplicated elements. Keep only one occurrence of activity name."
             raise ValueError(error_message)
 
-    def group(self):
+    def group(self) -> None:
         cases_grouped_by_id = self.log.groupby(self.case_id_key, dropna=True, sort=False)
         print("Manual log grouping:")
         for _, actual_case in tqdm(cases_grouped_by_id):
             self.iterate_case_rows(actual_case)
 
-    def iterate_case_rows(self, df: pd.DataFrame):
+    def iterate_case_rows(self, df: pd.DataFrame) -> None:
         for _, row in df.iterrows():
             if self.is_activities_left_to_be_grouped_empty():
                 self.reset_activities_left_to_be_grouped()
@@ -125,11 +129,11 @@ class ManualLogGrouping:
         ):
             return base_value + incoming_value
         if pd.api.types.is_string_dtype(type(base_value)):
-            if "[" in base_value or "]" in base_value:
+            if "[" in base_value or "]" in base_value:  # TODO: ordenarlos de forma alfabetica
                 return f"{base_value.replace(']', '')},{incoming_value}]"
             return f"[{base_value},{incoming_value}]"
         if pd.api.types.is_datetime64_any_dtype(type(base_value)):
-            return min(base_value, incoming_value)
+            return max(base_value, incoming_value)
         if pd.api.types.is_timedelta64_dtype(type(base_value)):
             return base_value + incoming_value
         if pd.api.types.is_categorical_dtype(type(base_value)):
