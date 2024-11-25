@@ -147,7 +147,6 @@ def view_multi_dimensional_drt(
 ) -> None:
     """
     Visualizes a multi-dimensional directly rooted tree (DRT) using a graphical format.
-
     Args:
         multi_dimension_drt (TreeNode): The root of the multi-dimensional DRT.
         visualize_time (bool, optional): Whether to include the time dimension in the visualization. Defaults to True.
@@ -165,10 +164,8 @@ def view_multi_dimensional_drt(
             - "min": Minimum measure of the arc.
             - "max": Maximum measure of the arc.
             Defaults to [].
-
     Raises:
         IOError: If the temporary file cannot be created or read.
-
     Returns:
         None
     """
