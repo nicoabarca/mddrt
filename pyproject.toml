@@ -1,7 +1,7 @@
 [project]
 name = "mddrt"
 version = "0.0.7"
-dependencies = ["pandas", "numpy", "pyarrow", "graphviz", "tqdm"]
+dependencies = ["pandas", "numpy", "pyarrow", "graphviz", "tqdm", "pm4py"]
 
 description = "Package for Multi-Dimension Directly Rooted Trees visualization"
 readme = "README.md"

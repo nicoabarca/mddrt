@@ -3,7 +3,6 @@ from __future__ import annotations
 from datetime import timedelta
 from typing import TYPE_CHECKING
 
-import pandas as pd
 from tqdm import tqdm
 
 from mddrt.tree_node import TreeNode
@@ -12,6 +11,7 @@ from mddrt.utils.builder import calculate_cases_metrics, dimensions_to_calculate
 if TYPE_CHECKING:
     from collections.abc import Hashable
 
+    import pandas as pd
     from pandas.core.groupby import DataFrameGroupBy
 
     from mddrt.drt_parameters import DirectlyRootedTreeParameters

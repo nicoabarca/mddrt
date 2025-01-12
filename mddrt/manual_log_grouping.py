@@ -36,9 +36,7 @@ class ManualLogGrouping:
         self.group()
 
     def set_group_name(self, group_name: str | None, activities_to_group: list[str]) -> str:
-        if group_name:
-            return group_name
-        return "[" + ",".join(activities_to_group) + "]"
+        return group_name if group_name else "[" + ",<br/>".join(activities_to_group) + "]"
 
     def validate_activities_to_group(self) -> None | ValueError:
         unique_activities_names = set(self.log[self.activity_id_key].unique())

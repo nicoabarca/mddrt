@@ -8,6 +8,8 @@ from typing import TYPE_CHECKING, Literal
 import pandas as pd
 from tqdm import tqdm
 
+from mddrt.utils.mandatory_activities import MandatoryActivities
+
 if TYPE_CHECKING:
     from mddrt.drt_parameters import DirectlyRootedTreeParameters
 
@@ -21,6 +23,7 @@ def calculate_cases_metrics(
 
     if params.calculate_flexibility and num_mandatory_activities is None:
         mandatory_activities = log.loc[log[params.case_id_key] == case_ids[0]][params.activity_key].unique()
+        MandatoryActivities().set_activities(list(mandatory_activities))
         mandatory_activities_set = set(mandatory_activities)
         print("Calculating log mandatory activities: ")
         for case_id in tqdm(case_ids):
@@ -28,6 +31,8 @@ def calculate_cases_metrics(
             case_activities = log_case[params.activity_key].unique()
             mandatory_activities_set = mandatory_activities_set.intersection(case_activities)
         num_mandatory_activities = len(mandatory_activities_set)
+
+    num_mandatory_activities = 0 if num_mandatory_activities is None else num_mandatory_activities
 
     log_metrics = []
     print("Calculating log metrics: ")
@@ -52,6 +57,8 @@ def calculate_cases_metrics(
                 case_metrics["Rework"] = len(log_case) - num_unique_activities
 
             if params.calculate_flexibility:
+                case_activities = log_case[params.activity_key].to_list()
+                mandatory_activities = log.loc[log[params.case_id_key] == case_ids[0]][params.activity_key].unique()
                 case_metrics["Optionality"] = num_unique_activities - num_mandatory_activities
 
             case_metrics["Optional Activities"] = num_unique_activities - num_mandatory_activities
