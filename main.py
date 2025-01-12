@@ -6,7 +6,7 @@ import pandas as pd
 
 import mddrt
 
-minimal_log_path = Path("data") / "minimal_log_4.csv"
+minimal_log_path = Path("data") / "minimal_log_5.csv"
 minimal_event_log = pd.read_csv(minimal_log_path, sep=";")
 minimal_format = {
     "case:concept:name": "case",
@@ -17,7 +17,19 @@ minimal_format = {
     "cost:total": "cost",
 }
 minimal_event_log = mddrt.log_formatter(minimal_event_log, minimal_format)
-grouped_minimal_event_log = mddrt.manual_log_grouping(minimal_event_log, activities_to_group={"A", "B"})
+
+bug_log_path = Path("data") / "Bug1.csv"
+bug_event_log = pd.read_csv(bug_log_path, sep=",")
+bug_format = {
+    "case:concept:name": "Rut",
+    "concept:name": "Actividad",
+    "time:timestamp": "Timestamp",
+    "start_timestamp": "",
+    "org:resource": "PPS rango",
+    "cost:total": "",
+}
+bug_event_log = mddrt.log_formatter(bug_event_log, bug_format, timestamp_format="mixed")
+
 
 blasting_log_path = Path("data") / "blasting_with_rework_event_log.csv"
 blasting_event_log = pd.read_csv(blasting_log_path, sep=";")
@@ -30,16 +42,14 @@ blasting_format = {
     "cost:total": "Cost",
 }
 blasting_event_log = mddrt.log_formatter(blasting_event_log, blasting_format)
-grouped_blasting_event_log = mddrt.manual_log_grouping(
-    blasting_event_log,
-    activities_to_group={"Revise terrain", "Design evacuation card", "Review blasting results"},
-)
 
-drt = mddrt.discover_multi_dimensional_drt(grouped_blasting_event_log, group_activities=True)
-mddrt.save_vis_multi_dimensional_drt(drt, file_path="blasting", format="svg")
-mddrt.view_multi_dimensional_drt(drt, format="png")
+# TESTING CODE
+drt = mddrt.discover_multi_dimensional_drt(minimal_event_log)
+# mddrt.save_vis_multi_dimensional_drt(drt, file_path="blasting", format="svg")
+mddrt.view_multi_dimensional_drt(
+    drt, node_measures=["total", "consumed", "remaining"], arc_measures=["avg"], format="png"
+)
 breakpoint()
-## Testing Purpose Only Code
 
 # Arc measures combinations without repeating
 arc_measures = ["avg", "min", "max"]

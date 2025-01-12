@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Literal
 
 from mddrt.utils.builder import activities_dimension_cumsum, create_dimensions_data
+from mddrt.utils.optional_activities import OptionalActivities
 from mddrt.utils.misc import pretty_format_dict
 
 if TYPE_CHECKING:
@@ -38,12 +39,15 @@ class TreeNode:
         self.frequency += 1
 
     def update_dimension(self, dimension: str, depth: int, current_case: dict) -> None:
-        if dimension == "time":
-            self.update_time_dimension(depth, current_case)
-        elif dimension == "cost":
-            self.update_cost_dimension(depth, current_case)
-        elif dimension in ["flexibility", "quality"]:
-            self.update_flexibility_quality_dimension(dimension, depth, current_case)
+        update_methods = {
+            "time": self.update_time_dimension,
+            "cost": self.update_cost_dimension,
+            "quality": self.update_quality_dimension,
+            "flexibility": self.update_flexibility_dimension,
+        }
+
+        if dimension in update_methods:
+            update_methods[dimension](depth, current_case)
 
     def update_time_dimension(self, depth: int, current_case: dict) -> None:
         time_data = self.dimensions_data["time"]
@@ -69,14 +73,21 @@ class TreeNode:
         self.update_cumulative_data(dimension_data, activity_cost, cost_cumsum[depth], current_case["cost"])
         self.update_min_max(dimension_data, activity_cost)
 
-    def update_flexibility_quality_dimension(self, dimension: str, depth: int, current_case: dict) -> None:
-        dimension_data = self.dimensions_data[dimension]
-        total_value = current_case[dimension]
-        avg_value = total_value / len(current_case["activities"])
-        dimension_cumsum = activities_dimension_cumsum(current_case, dimension)
+    def update_quality_dimension(self, depth: int, current_case: dict) -> None:
+        dimension_data = self.dimensions_data["quality"]
+        activities_till_depth = [activity["name"] for activity in current_case["activities"]][: depth + 1]
+        accumulated_rework = len(activities_till_depth) - len(set(activities_till_depth))
+        self.update_cumulative_data(dimension_data, accumulated_rework, accumulated_rework, current_case["quality"])
 
-        self.update_cumulative_data(dimension_data, avg_value, dimension_cumsum[depth], total_value)
-        self.update_min_max(dimension_data, total_value)
+    def update_flexibility_dimension(self, depth: int, current_case: dict) -> None:
+        dimension_data = self.dimensions_data["flexibility"]
+        case_activities = [activity["name"] for activity in current_case["activities"]]
+        optional_activities = OptionalActivities().get_activities()
+        activities_till_depth = case_activities[: depth + 1]
+        accumulated_optionality = len(set(activities_till_depth) & set(optional_activities))
+        self.update_cumulative_data(
+            dimension_data, accumulated_optionality, accumulated_optionality, current_case["flexibility"]
+        )
 
     def update_cumulative_data(
         self,

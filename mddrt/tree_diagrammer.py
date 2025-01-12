@@ -112,15 +112,17 @@ class DirectlyRootedTreeDiagrammer:
         )
         dimension_row = f"{dimension.capitalize()}<br/>"
         dimension_row += (
-            f"Avg. {'Lead' if dimension == 'time' else 'Total Case'} {dimension.capitalize()}: {avg_total_case}<br/>"
+            f"Avg. {self.build_dimension_row_string(dimension, 'total')}: {avg_total_case}<br/>"
             if "total" in self.node_measures
             else ""
         )
         dimension_row += (
-            f"Avg. Consumed {dimension.capitalize()}: {avg_consumed}<br/>" if "consumed" in self.node_measures else ""
+            f"Avg. {self.build_dimension_row_string(dimension, 'consumed')}: {avg_consumed}<br/>"
+            if "consumed" in self.node_measures
+            else ""
         )
         dimension_row += (
-            f"Avg. Remaining {dimension.capitalize()}: {avg_remaining}<br/>"
+            f"Avg. {self.build_dimension_row_string(dimension, 'remaining')}: {avg_remaining}<br/>"
             if "remaining" in self.node_measures
             else ""
         )
@@ -144,7 +146,7 @@ class DirectlyRootedTreeDiagrammer:
             )
 
     def build_link_label(self, node: TreeNode) -> str:
-        node_name = self.build_node_name(node)
+        node_name = self.build_activity_link_name(node)
         content = GRAPHVIZ_ACTIVITY_DATA.format(node_name)
         for dimension in self.dimensions_to_diagram:
             content += self.build_link_string(dimension, node)
@@ -191,12 +193,35 @@ class DirectlyRootedTreeDiagrammer:
             return f"{abs(round(value,2))} USD"
         return str(abs(round(value, 2)))
 
-    def build_node_name(self, node: TreeNode):
+    def build_activity_link_name(self, node: TreeNode):
         node_name = node.name
-        if "&" in node_name:  # checking for special characters
+        if "&" in node_name:
             node_name = node_name.replace("&", "&amp;")
+        if "<" in node_name:
+            node_name = node_name.replace("<", "&lt")
+        if ">" in node_name:
+            node_name = node_name.replace(">", "&gt")
+        if "=" in node_name:
+            node_name = node_name.replace("=", "&#61;")
 
         return f"{node_name} ({node.frequency})"
+
+    def build_dimension_row_string(self, dimension: str, metric: str) -> str:
+        metric_string_mapper = {
+            "time": {"total": "Lead Time", "consumed": "Consumed Time", "remaining": "Remaining Time"},
+            "cost": {"total": "Total Cost", "consumed": "Consumed Cost", "remaining": "Remaining Cost"},
+            "flexibility": {
+                "total": "Total Optional Activity Count",
+                "consumed": "Accumulated Optional Activity Count",
+                "remaining": "Remaining Optional Activity Count",
+            },
+            "quality": {
+                "total": "Total Rework Count",
+                "consumed": "Accumulated Rework Count",
+                "remaining": "Remaining Rework Count",
+            },
+        }
+        return metric_string_mapper[dimension][metric]
 
     def get_diagram_string(self) -> str:
         return self.diagram.source
