@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Literal
 
 from mddrt.utils.builder import activities_dimension_cumsum, create_dimensions_data
-from mddrt.utils.mandatory_activities import MandatoryActivities
+from mddrt.utils.optional_activities import OptionalActivities
 from mddrt.utils.misc import pretty_format_dict
 
 if TYPE_CHECKING:
@@ -82,30 +82,12 @@ class TreeNode:
     def update_flexibility_dimension(self, depth: int, current_case: dict) -> None:
         dimension_data = self.dimensions_data["flexibility"]
         case_activities = [activity["name"] for activity in current_case["activities"]]
-        mandatory_activities = MandatoryActivities().get_activities()
-        optional_activities = [activity for activity in case_activities if activity not in mandatory_activities]
-
+        optional_activities = OptionalActivities().get_activities()
         activities_till_depth = case_activities[: depth + 1]
-
-        accumulated_optionality = sum([1 for activity in activities_till_depth if activity in optional_activities])
-        total_case_optionality = sum([1 for activity in case_activities if activity in optional_activities])
-        remaining_optionality = total_case_optionality - accumulated_optionality
-
-        print("depth", depth, "node id", self.id)
-        print("dimension data", dimension_data)
-        print("\tcase activities", case_activities)
-        print("\tmandatory activities", mandatory_activities)
-        print("\toptional activities in case", optional_activities)
-        print("\tactivities till depth", activities_till_depth)
-        print("total case optionality", total_case_optionality)
-        print("accumulated optionality", accumulated_optionality)
-        print("remaining optionality", remaining_optionality)
+        accumulated_optionality = len(set(activities_till_depth) & set(optional_activities))
         self.update_cumulative_data(
-            dimension_data, total_case_optionality, accumulated_optionality, current_case["flexibility"]
+            dimension_data, accumulated_optionality, accumulated_optionality, current_case["flexibility"]
         )
-        print("dimension data after update", dimension_data)
-        print("")
-        # breakpoint()
 
     def update_cumulative_data(
         self,

@@ -45,7 +45,7 @@ blasting_event_log = mddrt.log_formatter(blasting_event_log, blasting_format)
 
 # TESTING CODE
 drt = mddrt.discover_multi_dimensional_drt(minimal_event_log)
-mddrt.save_vis_multi_dimensional_drt(drt, file_path="blasting", format="svg")
+# mddrt.save_vis_multi_dimensional_drt(drt, file_path="blasting", format="svg")
 mddrt.view_multi_dimensional_drt(
     drt, node_measures=["total", "consumed", "remaining"], arc_measures=["avg"], format="png"
 )

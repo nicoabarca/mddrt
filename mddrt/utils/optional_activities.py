@@ -1,7 +1,7 @@
 from typing import ClassVar
 
 
-class MandatoryActivities:
+class OptionalActivities:
     _instance = None
     _activities: ClassVar[list] = []
 
